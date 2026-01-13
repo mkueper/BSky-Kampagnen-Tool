@@ -40,6 +40,7 @@ PROJECT_CONTENT=(
   "packages/shared-ui"
   "packages/shared-logic"
   "packages/media-pickers"
+  "scripts/dev-link-preview.js"
 )
 CLIENT_ENV_SAMPLE="bsky-client/.env.sample"
 
