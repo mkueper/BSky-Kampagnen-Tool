@@ -304,6 +304,16 @@ const messages = {
           pending: 'Freizugeben',
           deleted: 'Papierkorb'
         },
+        search: {
+          toggleLabel: 'Suche einblenden',
+          buttonLabel: 'Suchen',
+          placeholder: 'Post-Inhalt durchsuchen',
+          apply: 'Suchen',
+          reset: 'Zurücksetzen',
+          resultsLabel: 'Treffer: {count}',
+          noResultsTitle: 'Keine Treffer',
+          noResultsDescription: 'Bitte Suchbegriff anpassen oder Filter leeren.'
+        },
         toolbar: {
           sortNewFirst: 'Neu zuerst',
           sortOldFirst: 'Alt zuerst',
@@ -1362,6 +1372,16 @@ const messages = {
           published: 'Published',
           pending: 'To approve',
           deleted: 'Trash'
+        },
+        search: {
+          toggleLabel: 'Toggle search',
+          buttonLabel: 'Search',
+          placeholder: 'Search post content',
+          apply: 'Search',
+          reset: 'Reset',
+          resultsLabel: 'Matches: {count}',
+          noResultsTitle: 'No results',
+          noResultsDescription: 'Adjust the search term or clear the filter.'
         },
         toolbar: {
           sortNewFirst: 'Newest first',

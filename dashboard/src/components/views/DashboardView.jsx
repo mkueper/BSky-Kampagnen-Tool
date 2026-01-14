@@ -43,6 +43,8 @@ function DashboardView ({
   platformLabels,
   activeTab,
   onTabChange,
+  plannedSearchApplied = '',
+  publishedSearchApplied = '',
   highlightedSkeetId = null,
   onHighlightConsumed,
   onPublishPendingOnce,
@@ -116,6 +118,26 @@ function DashboardView ({
     })
     return items
   }, [publishedSkeets, publishedSortOrder])
+  const plannedSearchTerm = useMemo(
+    () => plannedSearchApplied.trim().toLowerCase(),
+    [plannedSearchApplied]
+  )
+  const publishedSearchTerm = useMemo(
+    () => publishedSearchApplied.trim().toLowerCase(),
+    [publishedSearchApplied]
+  )
+  const filteredPlannedSkeets = useMemo(() => {
+    if (!plannedSearchTerm) return plannedSkeets
+    return plannedSkeets.filter(skeet =>
+      (skeet.content || '').toLowerCase().includes(plannedSearchTerm)
+    )
+  }, [plannedSkeets, plannedSearchTerm])
+  const filteredPublishedSkeets = useMemo(() => {
+    if (!publishedSearchTerm) return sortedPublishedSkeets
+    return sortedPublishedSkeets.filter(skeet =>
+      (skeet.content || '').toLowerCase().includes(publishedSearchTerm)
+    )
+  }, [sortedPublishedSkeets, publishedSearchTerm])
 
   const theme = useTheme()
   const pendingDisabled = !pendingSkeets || pendingSkeets.length === 0
@@ -245,30 +267,58 @@ function DashboardView ({
 
         <div className='px-6 pt-6 pb-6'>
           {activeTab === 'planned' ? (
-            <PlannedSkeetList
-              skeets={plannedSkeets}
-              onEdit={onEditSkeet}
-              onDelete={onDeleteSkeet}
-              getRepeatDescription={getRepeatDescription}
-              highlightedId={highlightedSkeetId}
-            />
+            filteredPlannedSkeets.length === 0 && plannedSearchTerm ? (
+              <div className='rounded-2xl border border-dashed border-border-muted bg-background-subtle p-8 text-center text-sm text-foreground-muted'>
+                <p className='font-medium text-foreground'>
+                  {t('posts.activity.search.noResultsTitle', 'Keine Treffer')}
+                </p>
+                <p className='mt-2'>
+                  {t(
+                    'posts.activity.search.noResultsDescription',
+                    'Bitte Suchbegriff anpassen oder Filter leeren.'
+                  )}
+                </p>
+              </div>
+            ) : (
+              <PlannedSkeetList
+                skeets={filteredPlannedSkeets}
+                onEdit={onEditSkeet}
+                onDelete={onDeleteSkeet}
+                getRepeatDescription={getRepeatDescription}
+                highlightedId={highlightedSkeetId}
+              />
+            )
           ) : activeTab === 'published' ? (
-            <PublishedSkeetList
-              skeets={sortedPublishedSkeets}
-              activeCardTabs={activeCardTabs}
-              repliesBySkeet={repliesBySkeet}
-              replyErrors={replyErrors}
-              loadingReplies={loadingReplies}
-              loadingReactions={loadingReactions}
-              onShowSkeetContent={onShowSkeetContent}
-              onShowRepliesContent={onShowRepliesContent}
-              onFetchReactions={onFetchReactions}
-              onRetract={onRetractSkeet}
-              reactionStats={reactionStats}
-              platformLabels={platformLabels}
-              formatTime={formatTime}
-              getItemRef={getRefForId}
-            />
+            filteredPublishedSkeets.length === 0 && publishedSearchTerm ? (
+              <div className='rounded-2xl border border-dashed border-border-muted bg-background-subtle p-8 text-center text-sm text-foreground-muted'>
+                <p className='font-medium text-foreground'>
+                  {t('posts.activity.search.noResultsTitle', 'Keine Treffer')}
+                </p>
+                <p className='mt-2'>
+                  {t(
+                    'posts.activity.search.noResultsDescription',
+                    'Bitte Suchbegriff anpassen oder Filter leeren.'
+                  )}
+                </p>
+              </div>
+            ) : (
+              <PublishedSkeetList
+                skeets={filteredPublishedSkeets}
+                activeCardTabs={activeCardTabs}
+                repliesBySkeet={repliesBySkeet}
+                replyErrors={replyErrors}
+                loadingReplies={loadingReplies}
+                loadingReactions={loadingReactions}
+                onShowSkeetContent={onShowSkeetContent}
+                onShowRepliesContent={onShowRepliesContent}
+                onFetchReactions={onFetchReactions}
+                onRetract={onRetractSkeet}
+                reactionStats={reactionStats}
+                platformLabels={platformLabels}
+                formatTime={formatTime}
+                getItemRef={getRefForId}
+              />
+            )
           ) : activeTab === 'deleted' ? (
             <DeletedSkeetList
               skeets={deletedSkeets}
@@ -347,7 +397,7 @@ function DashboardView ({
             )}
             onClick={async () => {
               try {
-                const ids = sortedPublishedSkeets
+                const ids = filteredPublishedSkeets
                   .map(s => s.id)
                   .filter(id => visibleIds.includes(id))
                 if (!ids.length) {
@@ -426,7 +476,7 @@ function DashboardView ({
               }
             }}
             disabled={
-              !sortedPublishedSkeets.some(s => visibleIds.includes(s.id))
+              !filteredPublishedSkeets.some(s => visibleIds.includes(s.id))
             }
           >
             <ReloadIcon className='h-4 w-4' />

@@ -6,6 +6,8 @@ import {
   ExternalLinkIcon,
   GearIcon,
   LayersIcon,
+  Cross2Icon,
+  MagnifyingGlassIcon,
   Pencil2Icon,
   UploadIcon,
   ViewHorizontalIcon,
@@ -194,6 +196,14 @@ function DashboardApp ({ onLogout, session, onRenew, onRefreshSession }) {
   const [highlightedSkeetId, setHighlightedSkeetId] = useState(null)
   const plannedListScrollRef = useRef(null)
   const [activeDashboardTab, setActiveDashboardTab] = useState('planned')
+  const [searchPopoverOpen, setSearchPopoverOpen] = useState(false)
+  const [plannedSearchQuery, setPlannedSearchQuery] = useState('')
+  const [plannedSearchApplied, setPlannedSearchApplied] = useState('')
+  const [publishedSearchQuery, setPublishedSearchQuery] = useState('')
+  const [publishedSearchApplied, setPublishedSearchApplied] = useState('')
+  const searchPopoverRef = useRef(null)
+  const searchButtonRef = useRef(null)
+  const searchInputRef = useRef(null)
   const { dialog: confirmDialog, openConfirm, closeConfirm } = useConfirmDialog()
   const [editingThreadId, setEditingThreadId] = useState(null)
   const toast = useToast()
@@ -969,6 +979,90 @@ function DashboardApp ({ onLogout, session, onRenew, onRefreshSession }) {
       : BASE_NAV_ITEMS.find(item => item.id === activeView)?.label ??
         ''
 
+  const isSearchableTab = activeDashboardTab === 'planned' || activeDashboardTab === 'published'
+  const isSearchEnabled = activeView === 'skeets-overview' && isSearchableTab
+  const activeSearchQuery =
+    activeDashboardTab === 'planned' ? plannedSearchQuery : publishedSearchQuery
+  const activeSearchApplied =
+    activeDashboardTab === 'planned' ? plannedSearchApplied : publishedSearchApplied
+  const plannedSearchTerm = plannedSearchApplied.trim().toLowerCase()
+  const publishedSearchTerm = publishedSearchApplied.trim().toLowerCase()
+  const plannedSearchMatchCount = plannedSearchTerm
+    ? plannedSkeetsWithoutPending.filter(skeet =>
+        (skeet.content || '').toLowerCase().includes(plannedSearchTerm)
+      ).length
+    : null
+  const publishedSearchMatchCount = publishedSearchTerm
+    ? publishedSkeets.filter(skeet =>
+        (skeet.content || '').toLowerCase().includes(publishedSearchTerm)
+      ).length
+    : null
+  const activeSearchCountLabel =
+    activeDashboardTab === 'planned'
+      ? (plannedSearchMatchCount === null
+          ? null
+          : t('posts.activity.search.resultsLabel', 'Treffer: {count}', {
+              count: plannedSearchMatchCount
+            }))
+      : (publishedSearchMatchCount === null
+          ? null
+          : t('posts.activity.search.resultsLabel', 'Treffer: {count}', {
+              count: publishedSearchMatchCount
+            }))
+
+  const handleSearchApply = useCallback((event) => {
+    if (event?.preventDefault) {
+      event.preventDefault()
+    }
+    if (!isSearchEnabled) return
+    if (activeDashboardTab === 'planned') {
+      setPlannedSearchApplied(plannedSearchQuery)
+    } else if (activeDashboardTab === 'published') {
+      setPublishedSearchApplied(publishedSearchQuery)
+    }
+  }, [activeDashboardTab, isSearchEnabled, plannedSearchQuery, publishedSearchQuery])
+
+  const handleSearchReset = useCallback(() => {
+    if (!isSearchEnabled) return
+    if (activeDashboardTab === 'planned') {
+      setPlannedSearchQuery('')
+      setPlannedSearchApplied('')
+    } else if (activeDashboardTab === 'published') {
+      setPublishedSearchQuery('')
+      setPublishedSearchApplied('')
+    }
+  }, [activeDashboardTab, isSearchEnabled])
+
+  useEffect(() => {
+    if (!isSearchEnabled && searchPopoverOpen) {
+      setSearchPopoverOpen(false)
+    }
+  }, [isSearchEnabled, searchPopoverOpen])
+
+  useEffect(() => {
+    if (!searchPopoverOpen) return undefined
+    const handlePointerDown = (event) => {
+      if (!searchPopoverRef.current) return
+      if (!searchPopoverRef.current.contains(event.target)) {
+        setSearchPopoverOpen(false)
+      }
+    }
+    window.addEventListener('mousedown', handlePointerDown)
+    window.addEventListener('touchstart', handlePointerDown)
+    return () => {
+      window.removeEventListener('mousedown', handlePointerDown)
+      window.removeEventListener('touchstart', handlePointerDown)
+    }
+  }, [searchPopoverOpen])
+
+  useEffect(() => {
+    if (!searchPopoverOpen) return
+    const timer = window.setTimeout(() => {
+      searchInputRef.current?.focus()
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [searchPopoverOpen, activeDashboardTab])
+
   const isThreadContext = activeView.startsWith('threads')
   const exportButtonLabel = exporting
     ? t('export.buttonBusy', 'Export…')
@@ -988,6 +1082,72 @@ function DashboardApp ({ onLogout, session, onRenew, onRefreshSession }) {
         <>
           <div className='inline-flex rounded-2xl border border-border-muted bg-background-elevated p-1 shadow-soft'>
             <div className='flex items-center gap-2'>
+              <div className='flex items-center gap-2' ref={searchPopoverRef}>
+                <div className='relative'>
+                  <Button
+                    variant='secondary'
+                    size='icon'
+                    onClick={() => {
+                      if (!isSearchEnabled) return
+                      setSearchPopoverOpen(prev => !prev)
+                    }}
+                    disabled={!isSearchEnabled}
+                    aria-label={t('posts.activity.search.toggleLabel', 'Suche einblenden')}
+                    title={t('posts.activity.search.toggleLabel', 'Suche einblenden')}
+                    ref={searchButtonRef}
+                  >
+                    <MagnifyingGlassIcon className='h-4 w-4' />
+                  </Button>
+                  {searchPopoverOpen && isSearchEnabled ? (
+                    <div
+                      className='absolute left-0 top-full z-30 mt-2 w-[calc(100vw-2rem)] rounded-2xl border border-border bg-background-elevated p-3 shadow-soft sm:w-72 md:w-80'
+                    >
+                      <form className='space-y-2' onSubmit={handleSearchApply}>
+                        <div className='flex items-center gap-2'>
+                          <input
+                            type='text'
+                            value={activeSearchQuery}
+                            onChange={event => {
+                              if (activeDashboardTab === 'planned') {
+                                setPlannedSearchQuery(event.target.value)
+                              } else {
+                                setPublishedSearchQuery(event.target.value)
+                              }
+                            }}
+                            ref={searchInputRef}
+                            className='w-full rounded-2xl border border-border bg-background-subtle px-3 py-2 text-sm text-foreground shadow-soft focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30'
+                            placeholder={t('posts.activity.search.placeholder', 'Post-Inhalt durchsuchen')}
+                          />
+                          <Button
+                            variant='secondary'
+                            size='icon'
+                            type='submit'
+                            aria-label={t('posts.activity.search.apply', 'Suchen')}
+                            title={t('posts.activity.search.apply', 'Suchen')}
+                          >
+                            <MagnifyingGlassIcon className='h-4 w-4' />
+                          </Button>
+                        </div>
+                        {activeSearchCountLabel ? (
+                          <span className='text-xs font-medium text-foreground-muted'>
+                            {activeSearchCountLabel}
+                          </span>
+                        ) : null}
+                      </form>
+                    </div>
+                  ) : null}
+                </div>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  onClick={handleSearchReset}
+                  disabled={!isSearchEnabled || !activeSearchApplied.trim()}
+                  aria-label={t('posts.activity.search.reset', 'Zurücksetzen')}
+                  title={t('posts.activity.search.reset', 'Zurücksetzen')}
+                >
+                  <Cross2Icon className='h-4 w-4' />
+                </Button>
+              </div>
               <Button
                 variant='secondary'
                 onClick={handleExport}
@@ -1237,6 +1397,8 @@ function DashboardApp ({ onLogout, session, onRenew, onRefreshSession }) {
           platformLabels={PLATFORM_LABELS}
           activeTab={activeDashboardTab}
           onTabChange={setActiveDashboardTab}
+          plannedSearchApplied={plannedSearchApplied}
+          publishedSearchApplied={publishedSearchApplied}
           highlightedSkeetId={highlightedSkeetId}
           onHighlightConsumed={() => setHighlightedSkeetId(null)}
           onPublishPendingOnce={handlePublishPendingOnce}

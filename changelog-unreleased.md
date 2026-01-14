@@ -5,6 +5,14 @@
 
 # ---
 
+## 2026-01-14
+
+### Dashboard
+
+- **Feature:** Such-Popover für geplante und veröffentlichte Posts (Header-Icons, Filter, Trefferanzeige, Reset, responsive Breite).
+
+# ---
+
 ## 2026-01-10
 
 ### Dashboard
