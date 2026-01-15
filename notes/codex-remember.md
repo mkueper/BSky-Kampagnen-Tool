@@ -20,3 +20,5 @@ Projektbezogenes Gedächtnis für Informationen, die **sessionübergreifend** wi
 
 * Nach nennenswerten Erweiterungen oder Änderungen **`changelog-unreleased`** zeitnah aktualisieren.
 * Als „nennenswert“ gelten typischerweise: neue Features, i18n-Umbauten oder UI-Refactors.
+- Offene Entscheidung: Im ProfileConnectionsModal soll die Follower/Folge-Ich-Anzahl weiterhin angezeigt werden, aber nicht als Subtitle im Header (verursacht Springen). Morgen klären, wo/how stattdessen platzieren. Außerdem Radien-Mismatch zwischen DetailPaneHeader und BskyDetailPane-Body prüfen.
+- Erweiterungen gemerkt: Übersetzungsfunktion ins Unroll-Modal integrieren; eingebettete Medien im Unroll anzeigen.

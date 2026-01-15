@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useAppDispatch } from '../../context/AppContext'
-import { useUIState } from '../../context/UIContext.jsx'
+import { useUIDispatch, useUIState } from '../../context/UIContext.jsx'
 import { useBskyAuth } from '../auth/AuthContext.jsx'
 import { fetchProfile, followActor, unfollowActor, fetchChatConversationForMembers } from '../shared/api/bsky'
 import {
@@ -34,6 +34,7 @@ import {
 } from '@radix-ui/react-icons'
 import { useTranslation } from '../../i18n/I18nProvider.jsx'
 import { BACK_BUTTON_CLASS } from '../shared/backButtonClass.js'
+import ProfileConnectionsModal from './ProfileConnectionsModal.jsx'
 
 const numberFormatter = new Intl.NumberFormat('de-DE')
 const PROFILE_SCROLL_CONTAINER_ID = 'bsky-profile-scroll-container'
@@ -58,7 +59,8 @@ function ProfileMeta ({
   followPending = false,
   onOpenChat,
   chatPending = false,
-  interactionsDisabled = false
+  interactionsDisabled = false,
+  onOpenStat
 }) {
   const { t } = useTranslation()
   const relationBadges = useMemo(() => {
@@ -79,10 +81,10 @@ function ProfileMeta ({
     return `https://bsky.app/profile/${encodeURIComponent(profileSlug)}`
   }, [profileSlug])
   const stats = useMemo(() => ([
-    { label: t('profile.stats.followers', 'Follower'), value: formatNumber(profile.followersCount), href: baseProfileUrl ? `${baseProfileUrl}/followers` : null },
-    { label: t('profile.stats.following', 'Folge ich'), value: formatNumber(profile.followsCount), href: baseProfileUrl ? `${baseProfileUrl}/follows` : null },
-    { label: t('profile.stats.posts', 'Beiträge'), value: formatNumber(profile.postsCount), href: baseProfileUrl || null }
-  ]), [baseProfileUrl, profile.followersCount, profile.followsCount, profile.postsCount, t])
+    { id: 'followers', label: t('profile.stats.followers', 'Follower'), value: formatNumber(profile.followersCount) },
+    { id: 'following', label: t('profile.stats.following', 'Folge ich'), value: formatNumber(profile.followsCount) },
+    { id: 'posts', label: t('profile.stats.posts', 'Beiträge'), value: formatNumber(profile.postsCount) }
+  ]), [profile.followersCount, profile.followsCount, profile.postsCount, t])
   const visibleBadges = relationBadges.filter((badge) => !badge.hidden)
 
   const copyProfileLink = useCallback(async () => {
@@ -256,21 +258,20 @@ function ProfileMeta ({
           ) : null}
           <div className='flex flex-wrap gap-x-6 gap-y-3 text-sm text-foreground-muted'>
             {stats.map((stat) => (
-              stat.href
+              typeof onOpenStat === 'function'
                 ? (
-                  <a
-                    key={stat.label}
-                    href={stat.href}
-                    target='_blank'
-                    rel='noreferrer'
+                  <button
+                    key={stat.id}
+                    type='button'
+                    onClick={() => onOpenStat(stat.id)}
                     className='flex items-center gap-2 text-foreground transition hover:text-foreground'
                   >
                     <span className='text-base font-semibold text-foreground'>{stat.value}</span>
                     <span className='text-foreground-muted'>{stat.label}</span>
-                  </a>
+                  </button>
                   )
                 : (
-                  <span key={stat.label} className='flex items-center gap-2'>
+                  <span key={stat.id} className='flex items-center gap-2'>
                     <span className='text-base font-semibold text-foreground'>{stat.value}</span>
                     <span className='text-foreground-muted'>{stat.label}</span>
                   </span>
@@ -383,11 +384,13 @@ export default function ProfileView ({
   actor: actorOverride = null,
   onClose,
   onHeadlineChange,
-  showHeroBackButton = true
+  showHeroBackButton = true,
+  onConnectionsVisibilityChange
 }) {
   const { t } = useTranslation()
   const auth = useBskyAuth()
   const { profileActor, me } = useUIState()
+  const uiDispatch = useUIDispatch()
   const dispatch = useAppDispatch()
   const actor = (actorOverride || profileActor || '').trim()
   const [profile, setProfile] = useState(null)
@@ -399,10 +402,13 @@ export default function ProfileView ({
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [followPending, setFollowPending] = useState(false)
   const [chatPending, setChatPending] = useState(false)
+  const [connectionsModal, setConnectionsModal] = useState({ open: false, type: null })
   const containerRef = useRef(null)
   const tabsWrapperRef = useRef(null)
   const tabsSentinelRef = useRef(null)
   const isMountedRef = useRef(true)
+  const connectionsScrollTopRef = useRef(0)
+  const connectionsActorRef = useRef(null)
 
   useEffect(() => {
     isMountedRef.current = true
@@ -513,6 +519,53 @@ export default function ProfileView ({
       }
     })
   }, [])
+
+  const handleOpenConnections = useCallback((type) => {
+    if (!profile || !containerRef.current) return
+    connectionsScrollTopRef.current = containerRef.current.scrollTop
+    connectionsActorRef.current = profile.did || profile.handle || actor
+    setConnectionsModal({ open: true, type })
+  }, [actor, profile])
+
+  const handleCloseConnections = useCallback(() => {
+    setConnectionsModal((prev) => ({ ...prev, open: false }))
+  }, [])
+
+  const handleSelectProfile = useCallback((nextProfile) => {
+    const nextActor = nextProfile?.did || nextProfile?.handle
+    if (!nextActor) return
+    connectionsActorRef.current = null
+    connectionsScrollTopRef.current = 0
+    setConnectionsModal({ open: false, type: null })
+    uiDispatch({ type: 'OPEN_PROFILE_VIEWER', actor: nextActor })
+  }, [uiDispatch])
+
+  const handleStatSelect = useCallback((statId) => {
+    if (statId === 'posts') {
+      setActiveTab('posts')
+      return
+    }
+    if (statId === 'followers' || statId === 'following') {
+      handleOpenConnections(statId)
+    }
+  }, [handleOpenConnections])
+
+  useEffect(() => {
+    if (connectionsModal.open) return
+    const container = containerRef.current
+    if (!container || !connectionsActorRef.current) return
+    const activeActor = profile?.did || profile?.handle || actor
+    if (activeActor !== connectionsActorRef.current) return
+    const targetScroll = connectionsScrollTopRef.current
+    requestAnimationFrame(() => {
+      container.scrollTop = targetScroll
+    })
+  }, [actor, connectionsModal.open, profile])
+
+  useEffect(() => {
+    if (typeof onConnectionsVisibilityChange !== 'function') return
+    onConnectionsVisibilityChange(connectionsModal.open)
+  }, [connectionsModal.open, onConnectionsVisibilityChange])
   const isBlockedBy = Boolean(profile?.viewer?.blockedBy)
   const isBlocking = Boolean(profile?.viewer?.blocking)
   const isInteractionBlocked = isBlockedBy || isBlocking
@@ -714,114 +767,130 @@ export default function ProfileView ({
   }
 
   return (
-    <div
-      ref={containerRef}
-      id={PROFILE_SCROLL_CONTAINER_ID}
-      className='mx-auto flex h-full w-full flex-1 flex-col gap-4 overflow-y-auto p-3 sm:gap-6 sm:p-4'
-    >
-      <div className='relative z-10'>
-        <ProfileMeta
-          profile={profile}
-          onBack={showHeroBackButton ? handleClose : null}
-          isOwnProfile={isOwnProfile}
-          tabsStuck={tabsStuck}
-          onToggleMute={toggleMute}
-          onToggleBlock={toggleBlock}
-          onEditProfile={isOwnProfile ? handleOpenEditProfile : null}
-          onOpenNotifications={!isOwnProfile ? handleOpenNotifications : null}
-          onToggleFollow={!isOwnProfile ? handleToggleFollow : null}
-          followPending={followPending}
-          onOpenChat={!isOwnProfile ? handleOpenChat : null}
-          chatPending={chatPending}
-          interactionsDisabled={isInteractionBlocked}
-        />
-      </div>
-      <div ref={tabsSentinelRef} aria-hidden='true' className='h-1 w-full' />
-      <div ref={tabsWrapperRef} className='sticky -top-4 z-20 -mt-4'>
-        <Card padding='p-3 sm:p-4' compact className='relative z-0 space-y-3 border-border/80 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80'>
-          <div className='flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground'>
-            {
-              <button
-                type='button'
-                onClick={handleClose}
-                className={BACK_BUTTON_CLASS}
-                aria-label={t('profile.actions.back', 'Zurück')}
-              >
-                <ArrowLeftIcon className='h-4 w-4' />
-              </button>
-            }
-            <div className='flex flex-wrap gap-2'>
-              {tabConfig.map((tab) => {
-                const isActive = activeTab === tab.id
-                return (
-                  <button
-                    key={tab.id}
-                    type='button'
-                    disabled={tab.disabled}
-                    onClick={() => !tab.disabled && setActiveTab(tab.id)}
-                    className={`rounded-full border px-3 py-1 text-sm transition ${
-                      isActive
-                        ? 'border-foreground bg-foreground text-background'
-                        : 'border-border bg-background text-foreground hover:border-foreground/60'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                )
-              })}
-            </div>
+    <div className='relative flex h-full min-h-0 flex-1'>
+      <div
+        ref={containerRef}
+        id={PROFILE_SCROLL_CONTAINER_ID}
+        className={`mx-auto flex h-full w-full flex-1 flex-col gap-4 p-3 sm:gap-6 sm:p-4 ${
+          connectionsModal.open ? 'overflow-hidden' : 'overflow-y-auto'
+        }`}
+      >
+        <div className={connectionsModal.open ? 'invisible pointer-events-none' : undefined}>
+          <div className='relative z-10'>
+            <ProfileMeta
+              profile={profile}
+              onBack={showHeroBackButton ? handleClose : null}
+              isOwnProfile={isOwnProfile}
+              tabsStuck={tabsStuck}
+              onToggleMute={toggleMute}
+              onToggleBlock={toggleBlock}
+              onEditProfile={isOwnProfile ? handleOpenEditProfile : null}
+              onOpenNotifications={!isOwnProfile ? handleOpenNotifications : null}
+              onToggleFollow={!isOwnProfile ? handleToggleFollow : null}
+              followPending={followPending}
+              onOpenChat={!isOwnProfile ? handleOpenChat : null}
+              chatPending={chatPending}
+              interactionsDisabled={isInteractionBlocked}
+              onOpenStat={handleStatSelect}
+            />
           </div>
-        </Card>
-      </div>
-      {isInteractionBlocked ? (
-        <Card padding='p-4' className='border-border bg-background-subtle text-sm text-foreground'>
-          <p className='font-semibold text-foreground'>{t('profile.hidden.heading', 'Beiträge ausgeblendet')}</p>
-          <p className='mt-1 text-foreground-muted'>
-            {isBlockedBy
-              ? t('profile.hidden.blockedBy', 'Dieser Account blockiert dich. Beiträge, Antworten und Medien werden ausgeblendet.')
-              : t('profile.hidden.youBlocked', 'Du blockierst diesen Account. Beiträge, Antworten und Medien bleiben ausgeblendet, bis du die Blockierung aufhebst.')}
-          </p>
-        </Card>
-      ) : (() => {
-        const allowedTabs = new Set(['posts', 'replies', 'media', 'videos'])
-        if (isOwnProfile) allowedTabs.add('likes')
-        if (!allowedTabs.has(activeTab)) return null
-        return (
-          <ProfilePosts
-            actor={profile.did}
-            actorHandle={profile.handle || ''}
-            activeTab={activeTab}
-            scrollContainerRef={containerRef}
+          <div ref={tabsSentinelRef} aria-hidden='true' className='h-1 w-full' />
+          <div ref={tabsWrapperRef} className='sticky -top-4 z-20 -mt-4'>
+            <Card padding='p-3 sm:p-4' compact className='relative z-0 space-y-3 border-border/80 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80'>
+              <div className='flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground'>
+                {
+                  <button
+                    type='button'
+                    onClick={handleClose}
+                    className={BACK_BUTTON_CLASS}
+                    aria-label={t('profile.actions.back', 'Zurück')}
+                  >
+                    <ArrowLeftIcon className='h-4 w-4' />
+                  </button>
+                }
+                <div className='flex flex-wrap gap-2'>
+                  {tabConfig.map((tab) => {
+                    const isActive = activeTab === tab.id
+                    return (
+                      <button
+                        key={tab.id}
+                        type='button'
+                        disabled={tab.disabled}
+                        onClick={() => !tab.disabled && setActiveTab(tab.id)}
+                        className={`rounded-full border px-3 py-1 text-sm transition ${
+                          isActive
+                            ? 'border-foreground bg-foreground text-background'
+                            : 'border-border bg-background text-foreground hover:border-foreground/60'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </Card>
+          </div>
+          {isInteractionBlocked ? (
+            <Card padding='p-4' className='border-border bg-background-subtle text-sm text-foreground'>
+              <p className='font-semibold text-foreground'>{t('profile.hidden.heading', 'Beiträge ausgeblendet')}</p>
+              <p className='mt-1 text-foreground-muted'>
+                {isBlockedBy
+                  ? t('profile.hidden.blockedBy', 'Dieser Account blockiert dich. Beiträge, Antworten und Medien werden ausgeblendet.')
+                  : t('profile.hidden.youBlocked', 'Du blockierst diesen Account. Beiträge, Antworten und Medien bleiben ausgeblendet, bis du die Blockierung aufhebst.')}
+              </p>
+            </Card>
+          ) : (() => {
+            const allowedTabs = new Set(['posts', 'replies', 'media', 'videos'])
+            if (isOwnProfile) allowedTabs.add('likes')
+            if (!allowedTabs.has(activeTab)) return null
+            return (
+              <ProfilePosts
+                actor={profile.did}
+                actorHandle={profile.handle || ''}
+                activeTab={activeTab}
+                scrollContainerRef={containerRef}
+              />
+            )
+          })()}
+          <EditProfileModal
+            open={editProfileOpen}
+            profile={profile}
+            onClose={() => setEditProfileOpen(false)}
+            onSaved={handleProfileSaved}
           />
-        )
-      })()}
-      <EditProfileModal
-        open={editProfileOpen}
+          <ProfileNotificationsModal
+            open={notificationsOpen}
+            profile={profile}
+            onClose={() => setNotificationsOpen(false)}
+            onSaved={handleNotificationsSaved}
+          />
+          <ScrollTopButton
+            containerId={PROFILE_SCROLL_CONTAINER_ID}
+            position='bottom-left'
+            offset={20}
+            horizontalOffset={16}
+          />
+          <ConfirmDialog
+            open={confirmDialog.open}
+            title={confirmDialog.title}
+            description={confirmDialog.description}
+            confirmLabel={confirmDialog.confirmLabel}
+            cancelLabel={confirmDialog.cancelLabel}
+            variant={confirmDialog.variant || 'primary'}
+            onConfirm={confirmDialog.onConfirm || closeConfirm}
+            onCancel={closeConfirm}
+          />
+        </div>
+      </div>
+      <ProfileConnectionsModal
+        open={connectionsModal.open}
+        type={connectionsModal.type}
+        actor={profile?.did || profile?.handle || actor}
         profile={profile}
-        onClose={() => setEditProfileOpen(false)}
-        onSaved={handleProfileSaved}
-      />
-      <ProfileNotificationsModal
-        open={notificationsOpen}
-        profile={profile}
-        onClose={() => setNotificationsOpen(false)}
-        onSaved={handleNotificationsSaved}
-      />
-      <ScrollTopButton
-        containerId={PROFILE_SCROLL_CONTAINER_ID}
-        position='bottom-left'
-        offset={20}
-        horizontalOffset={16}
-      />
-      <ConfirmDialog
-        open={confirmDialog.open}
-        title={confirmDialog.title}
-        description={confirmDialog.description}
-        confirmLabel={confirmDialog.confirmLabel}
-        cancelLabel={confirmDialog.cancelLabel}
-        variant={confirmDialog.variant || 'primary'}
-        onConfirm={confirmDialog.onConfirm || closeConfirm}
-        onCancel={closeConfirm}
+        currentUserDid={me?.did || auth?.profile?.did || ''}
+        onClose={handleCloseConnections}
+        onSelectProfile={handleSelectProfile}
       />
     </div>
   )

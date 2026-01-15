@@ -322,7 +322,9 @@ export default function BskyClientLayout ({
   const showTopBlock = Boolean(topBlock) && !isPaneExclusive
   const contentWrapperClassName = clsx(
     hasDetailPane
-      ? 'flex flex-col gap-6 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)] xl:gap-8'
+      ? isPaneExclusive
+        ? 'flex flex-col gap-6'
+        : 'flex flex-col gap-6 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)] xl:gap-8'
       : '',
     hasDetailPane ? 'mt-0' : '',
     detailPaneActive ? 'h-full min-h-0' : ''

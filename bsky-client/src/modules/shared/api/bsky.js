@@ -2677,6 +2677,56 @@ export async function fetchProfile (actor) {
   }
 }
 
+function mapActorListItem (actor) {
+  if (!actor) return null
+  return {
+    did: actor?.did || '',
+    handle: actor?.handle || '',
+    displayName: actor?.displayName || actor?.handle || '',
+    avatar: actor?.avatar || null,
+    description: actor?.description || '',
+    viewer: actor?.viewer || null
+  }
+}
+
+export async function fetchFollowers ({ actor, cursor, limit } = {}) {
+  const normalized = normalizeActor(actor)
+  const agent = assertActiveAgent()
+  const safeLimit = clampNumber(limit, 1, 100, 25)
+  const params = { actor: normalized, limit: safeLimit }
+  if (cursor) params.cursor = cursor
+  const res = await agent.app.bsky.graph.getFollowers(params)
+  const data = res?.data ?? res ?? {}
+  const followers = Array.isArray(data?.followers) ? data.followers : []
+  const items = followers
+    .map(mapActorListItem)
+    .filter((entry) => entry?.did || entry?.handle)
+  return {
+    items,
+    cursor: data?.cursor || null,
+    subject: data?.subject || null
+  }
+}
+
+export async function fetchFollows ({ actor, cursor, limit } = {}) {
+  const normalized = normalizeActor(actor)
+  const agent = assertActiveAgent()
+  const safeLimit = clampNumber(limit, 1, 100, 25)
+  const params = { actor: normalized, limit: safeLimit }
+  if (cursor) params.cursor = cursor
+  const res = await agent.app.bsky.graph.getFollows(params)
+  const data = res?.data ?? res ?? {}
+  const follows = Array.isArray(data?.follows) ? data.follows : []
+  const items = follows
+    .map(mapActorListItem)
+    .filter((entry) => entry?.did || entry?.handle)
+  return {
+    items,
+    cursor: data?.cursor || null,
+    subject: data?.subject || null
+  }
+}
+
 export async function uploadProfileImage (file) {
   if (!file) throw new Error('Datei erforderlich.')
   const agent = assertActiveAgent()

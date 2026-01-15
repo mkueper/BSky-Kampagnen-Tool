@@ -4,7 +4,7 @@
 
 ## 1. Datum (TT.MM.JJJJ)
 
-06.01.2026
+07.01.2026
 
 ## 2. Status (aktueller Stand, keine ToDos)
 
@@ -20,21 +20,24 @@
 - Preview-Proxy ist in den Client-Einstellungen konfigurierbar und wird im Link-Preview-Service verwendet; Dashboard liefert die URL fuer das Kampagnen-Tool separat.
 - Externe Dienste im Client: Layout zweispaltig + Link-Vorschau einspaltig, Texte/Hints wurden vereinfacht und mehrfach abgestimmt.
 - Client-Settings Modal wurde in der Hoehe angepasst, um Scrollen im Externe-Dienste-Tab zu reduzieren.
+- Profil: Follower/Folge-Ich-Listen laufen im internen Modal (kein Browser-Tab), Follow/Unfollow-Buttons in der Liste, Profil-Header wird im Modal korrekt ausgeblendet; PWA/large-width Layout-Sprung im Detailpane behoben.
 
 ## 3. Startpunkt (kurze Einleitung für die nächste Session)
 
-Der Service-Layer ist stabil; der naechste Fokus liegt auf Feinschliff der Client-Einstellungen (Texte/Hint-Platzierung/Spacing), bevor weitere UI-Themen priorisiert werden.
+Als naechstes: die Follower/Folge-Ich-Anzahl wieder anzeigen, aber nicht als Header-Subtitle (verursacht Springen) und den Radius-Mismatch zwischen DetailPaneHeader und BskyDetailPane-Body adressieren.
 
 ## 4. Nächste Schritte (konkrete, umsetzbare ToDos)
 
-1) Client-Einstellungen final abstimmen (Texte/Hints/Layout), insbesondere Externe Dienste.
-2) Entscheidung zur globalen Spacing-Reduktion fuer weniger Scrollen vorbereiten.
+1) Follower/Folge-Ich-Anzahl im Modal neu platzieren (nicht als Subtitle) und Header-Radius/Body-Radius angleichen.
+2) Client-Einstellungen final abstimmen (Texte/Hints/Layout), insbesondere Externe Dienste.
+3) Entscheidung zur globalen Spacing-Reduktion fuer weniger Scrollen vorbereiten.
 
 ## 5. Abschluss-Check (prüfbare Kriterien, optional)
 
 - `useNotificationPolling` trennt Badges (`fetchUnreadNotificationsCount`) von Snapshot-/Has-New-Logiken und läuft nur bei den jeweils nötigen Flags.
 - `ClientServiceOrchestrator` versorgt alle Services mit den richtigen Aktivitäts- und Badge-Parametern, `SectionRenderer` bleibt Polling-frei.
 - Client-Settings: Preview-Proxy kann gespeichert werden, Texte/Hint-Logik ist abgestimmt, Externe Dienste bleibt ohne unnoetiges Scrollen.
+- Profil-Modal: Anzahl sichtbar ohne Header-Springen; Header/Body-Radien konsistent.
 
 ## 6. Offene Fragen (keine Tasks)
 

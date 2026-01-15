@@ -13,6 +13,7 @@ export default function ProfileViewerPane ({ registerLayoutHeader, renderHeaderI
   const dispatch = useUIDispatch()
   const actor = profileViewer?.actor || ''
   const [headline, setHeadline] = useState({ name: '', handle: '', did: '' })
+  const [connectionsOpen, setConnectionsOpen] = useState(false)
 
   const handleClose = () => dispatch({ type: 'CLOSE_PROFILE_VIEWER' })
   const handleHeadlineChange = useCallback((info) => {
@@ -42,7 +43,7 @@ export default function ProfileViewerPane ({ registerLayoutHeader, renderHeaderI
 
   return (
     <BskyDetailPane
-      header={{
+      header={connectionsOpen ? null : {
         title: headerTitle,
         onBack: handleClose
       }}
@@ -61,6 +62,7 @@ export default function ProfileViewerPane ({ registerLayoutHeader, renderHeaderI
           onClose={handleClose}
           onHeadlineChange={handleHeadlineChange}
           showHeroBackButton={false}
+          onConnectionsVisibilityChange={setConnectionsOpen}
         />
       </Suspense>
     </BskyDetailPane>
