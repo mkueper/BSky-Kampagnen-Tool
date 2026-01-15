@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useAppDispatch } from '../../context/AppContext'
 import { useUIState } from '../../context/UIContext.jsx'
 import { useBskyAuth } from '../auth/AuthContext.jsx'
-import { fetchProfile } from '../shared/api/bsky'
+import { fetchProfile, followActor, unfollowActor, fetchChatConversationForMembers } from '../shared/api/bsky'
 import {
   Card,
   ScrollTopButton,
@@ -45,7 +45,21 @@ function formatNumber (value) {
 }
 
 // This is a simplified view. We can reuse/enhance the ProfileCard from ProfilePreview later.
-function ProfileMeta ({ profile, onBack, isOwnProfile = false, tabsStuck = false, onToggleMute, onToggleBlock, onEditProfile, onOpenNotifications }) {
+function ProfileMeta ({
+  profile,
+  onBack,
+  isOwnProfile = false,
+  tabsStuck = false,
+  onToggleMute,
+  onToggleBlock,
+  onEditProfile,
+  onOpenNotifications,
+  onToggleFollow,
+  followPending = false,
+  onOpenChat,
+  chatPending = false,
+  interactionsDisabled = false
+}) {
   const { t } = useTranslation()
   const relationBadges = useMemo(() => {
     const next = []
@@ -104,7 +118,7 @@ function ProfileMeta ({ profile, onBack, isOwnProfile = false, tabsStuck = false
   const followLabel = isFollowing ? t('profile.follow.following', 'Gefolgt') : t('profile.follow.follow', 'Folgen')
   const followTitle = isFollowing
     ? t('profile.follow.followingTitle', 'Du folgst diesem Profil bereits')
-    : t('profile.follow.followTitle', 'Folgen (bald verfügbar)')
+    : t('profile.follow.followTitle', 'Folgen')
   const circleButtonClass = 'inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background text-foreground transition hover:border-foreground/70'
 
   if (!profile) return null
@@ -161,22 +175,26 @@ function ProfileMeta ({ profile, onBack, isOwnProfile = false, tabsStuck = false
               </button>
               <button
                 type='button'
-                disabled
+                onClick={onOpenChat}
+                disabled={!onOpenChat || chatPending || interactionsDisabled}
                 aria-label={t('profile.actions.messageLabel', 'Nachricht senden')}
-                title={t('profile.actions.messageTitle', 'Nachricht (bald verfügbar)')}
+                title={t('profile.actions.messageTitle', 'Nachricht senden')}
                 className={circleButtonClass}
+                aria-busy={chatPending || undefined}
               >
                 <ChatBubbleIcon className='h-4 w-4' />
               </button>
               <button
                 type='button'
-                disabled
+                onClick={onToggleFollow}
+                disabled={!onToggleFollow || followPending || interactionsDisabled}
                 title={followTitle}
                 className={`inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold ${
                   isFollowing
                     ? 'border border-primary/60 bg-primary/15 text-primary'
                     : 'border border-border bg-background text-foreground'
                 }`}
+                aria-busy={followPending || undefined}
               >
                 {followLabel}
               </button>
@@ -379,6 +397,8 @@ export default function ProfileView ({
   const [tabsStuck, setTabsStuck] = useState(false)
   const [editProfileOpen, setEditProfileOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [followPending, setFollowPending] = useState(false)
+  const [chatPending, setChatPending] = useState(false)
   const containerRef = useRef(null)
   const tabsWrapperRef = useRef(null)
   const tabsSentinelRef = useRef(null)
@@ -574,6 +594,65 @@ export default function ProfileView ({
     })
   }, [profile, openConfirm])
 
+  const handleToggleFollow = useCallback(async () => {
+    if (!profile || !profile.did || followPending) return
+    const currentFollowing = profile.viewer?.following
+    const previousFollowersCount = profile.followersCount
+    setFollowPending(true)
+    setError('')
+    setProfile((prev) => {
+      if (!prev) return prev
+      const followersCount = Number.isFinite(prev.followersCount)
+        ? Math.max(0, prev.followersCount + (currentFollowing ? -1 : 1))
+        : prev.followersCount
+      return {
+        ...prev,
+        followersCount,
+        viewer: {
+          ...(prev.viewer || {}),
+          following: currentFollowing ? null : true
+        }
+      }
+    })
+    try {
+      if (currentFollowing) {
+        await unfollowActor({ uri: currentFollowing })
+        setProfile((prev) => (prev ? { ...prev, viewer: { ...(prev.viewer || {}), following: null } } : prev))
+      } else {
+        const result = await followActor({ actor: profile.did || profile.handle })
+        const nextUri = result?.uri || result?.data?.uri || true
+        setProfile((prev) => (prev ? { ...prev, viewer: { ...(prev.viewer || {}), following: nextUri } } : prev))
+      }
+    } catch (err) {
+      setProfile((prev) => (prev ? { ...prev, followersCount: previousFollowersCount, viewer: { ...(prev.viewer || {}), following: currentFollowing || null } } : prev))
+      setError(err?.message || t('profile.errors.followFailed', 'Folgen fehlgeschlagen'))
+    } finally {
+      setFollowPending(false)
+    }
+  }, [followPending, profile, t])
+
+  const handleOpenChat = useCallback(async () => {
+    if (!profile || !profile.did || chatPending) return
+    setChatPending(true)
+    setError('')
+    try {
+      const response = await fetchChatConversationForMembers({ members: [profile.did] })
+      const conversation = response?.conversation || null
+      if (!conversation?.id) {
+        throw new Error(t('chat.share.openFailed', 'Chat konnte nicht geöffnet werden.'))
+      }
+      dispatch({
+        type: 'OPEN_CHAT_VIEWER',
+        conversationId: conversation.id,
+        conversation
+      })
+    } catch (err) {
+      setError(err?.message || t('chat.share.openFailed', 'Chat konnte nicht geöffnet werden.'))
+    } finally {
+      setChatPending(false)
+    }
+  }, [chatPending, dispatch, profile, t])
+
   const tabConfig = useMemo(() => ([
     { id: 'posts', label: t('profile.tabs.posts', 'Beiträge'), disabled: false },
     { id: 'replies', label: t('profile.tabs.replies', 'Antworten'), disabled: false },
@@ -650,6 +729,11 @@ export default function ProfileView ({
           onToggleBlock={toggleBlock}
           onEditProfile={isOwnProfile ? handleOpenEditProfile : null}
           onOpenNotifications={!isOwnProfile ? handleOpenNotifications : null}
+          onToggleFollow={!isOwnProfile ? handleToggleFollow : null}
+          followPending={followPending}
+          onOpenChat={!isOwnProfile ? handleOpenChat : null}
+          chatPending={chatPending}
+          interactionsDisabled={isInteractionBlocked}
         />
       </div>
       <div ref={tabsSentinelRef} aria-hidden='true' className='h-1 w-full' />

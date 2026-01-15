@@ -222,14 +222,14 @@ const messages = {
         following: 'Gefolgt',
         follow: 'Folgen',
         followingTitle: 'Du folgst diesem Profil bereits',
-        followTitle: 'Folgen (bald verfügbar)'
+        followTitle: 'Folgen'
       },
       actions: {
         back: 'Zurück',
         notificationsLabel: 'Benachrichtigungen verwalten',
         notificationsTitle: 'Benachrichtigungen verwalten',
         messageLabel: 'Nachricht senden',
-        messageTitle: 'Nachricht (bald verfügbar)',
+        messageTitle: 'Nachricht senden',
         editProfile: 'Profil bearbeiten',
         moreLabel: 'Weitere Aktionen',
         moreTitle: 'Aktionen'
@@ -286,6 +286,7 @@ const messages = {
       },
       errors: {
         muteToggleFailed: 'Stummschalten fehlgeschlagen',
+        followFailed: 'Folgen fehlgeschlagen',
         unblockFailed: 'Blockierung aufheben fehlgeschlagen',
         blockFailed: 'Blockieren fehlgeschlagen',
         noActor: 'Kein Profil zum Anzeigen ausgewählt.',
@@ -2029,14 +2030,14 @@ const messages = {
         following: 'Following',
         follow: 'Follow',
         followingTitle: 'You already follow this profile',
-        followTitle: 'Follow (coming soon)'
+        followTitle: 'Follow'
       },
       actions: {
         back: 'Back',
         notificationsLabel: 'Manage notifications',
         notificationsTitle: 'Manage notifications',
         messageLabel: 'Send message',
-        messageTitle: 'Message (coming soon)',
+        messageTitle: 'Send message',
         editProfile: 'Edit profile',
         moreLabel: 'More actions',
         moreTitle: 'Actions'
@@ -2092,6 +2093,7 @@ const messages = {
       },
       errors: {
         muteToggleFailed: 'Mute toggle failed.',
+        followFailed: 'Follow failed.',
         unblockFailed: 'Failed to unblock account.',
         blockFailed: 'Failed to block account.',
         noActor: 'No profile selected.',
