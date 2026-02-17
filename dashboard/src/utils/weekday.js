@@ -2,6 +2,7 @@
 export function getWeekInfo (
   locale = typeof navigator !== 'undefined' ? navigator.language : 'de-DE'
 ) {
+  const isUS = /^en-US/i.test(locale)
   try {
     // Neuere Engines: Intl.Locale.weekInfo
     const loc = new Intl.Locale(locale)
@@ -11,9 +12,9 @@ export function getWeekInfo (
   } catch (e) {
     // Fallback: en-US → Sonntag zuerst, sonst Montag
     console.error('Fallback: Nutze US Locale:', e)
-    const isUS = /^en-US/i.test(locale)
-    return { firstDay: isUS ? 7 : 1 }
   }
+  // Fallback wenn Intl.Locale.weekInfo fehlt
+  return { firstDay: isUS ? 7 : 1 }
 }
 
 export function weekdayOrder (locale) {
