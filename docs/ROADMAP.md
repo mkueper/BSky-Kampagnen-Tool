@@ -6,12 +6,13 @@ Die Roadmap beschreibt mittelfristige Schwerpunkte. Sie wird laufend angepasst; 
 
 ## Phase 1 – Stabilisierung & Betrieb (laufend)
 
-**Ziel:** Das bestehende Funktionsset (Planung, Scheduler, Engagement, integrierter Bluesky-Client) robust und produktionsnah betreiben können.
+**Ziel:** Das bestehende Funktionsset aus Planung, Scheduler, Engagement und Plattformanbindung robust und produktionsnah betreiben können.
 
 Schwerpunkte:
 - Medien-Handling & Upload: Implementiert; ausstehend sind Stresstests (große Dateien, Abbrüche, langsame Verbindungen).
-- Überfällige Skeets/Threads: Backend-Logik vorhanden; UI-Ansicht und Freigabe-Workflow ergänzen. Zuverlässige Tests auf Basis sqlite3 inMemory aufbauen.
-- Skeet-/Thread-Historie (täglich, wöchentlich, monatlich): Funktional, inklusive UI-Anzeige. Ausbau der Testabdeckung (Zeitlogik, Randfälle).
+- Überfällige Posts: Freigabe- und Verwerfen-Workflow sind vorhanden. Die Testabdeckung für Zeitlogik und Randfälle weiter ausbauen.
+- Wiederkehrende Posts: Pausieren und Fortsetzen sind vorhanden; dabei bleibt der Wiederholungsanker erhalten. Zusätzliche Szenarien für Zeitlogik und Randfälle testen.
+- Sendehistorie für Posts und Threads: Funktional, inklusive UI-Anzeige. Ausbau der Testabdeckung.
 - Teststrategie: sqlite3 inMemory für Unit/Integration-Tests; ergänzend einzelne Szenarien gegen File-basierte SQLite-DB für realistischere Bedingungen.
 
 ---
@@ -21,7 +22,6 @@ Schwerpunkte:
 Ziel: Die bestehende Einzelbenutzer-Authentifizierung stabil, sicher und zukunftsfähig machen.
 
 Schwerpunkte:
-- Rate-Limiting für Login-Versuche
 - Token-Handling verbessern (Invalidierung, Ablauf, Rotation)
 - Logging sicherheitsrelevanter Aktionen (z. B. Login, Scheduler)
 - Vorbereitung einer optionalen TOTP-basierten Zwei-Faktor-Authentifizierung (zunächst nur für den Admin-Account)
@@ -33,7 +33,7 @@ Schwerpunkte:
 **Ziel:** Zusätzliche Kanäle und Automatisierungen erschließen, ohne den Kern zu überlasten.
 
 Ideen & Kandidaten:
-- Mastodon-Anbindung: API-Integration und Posting sind implementiert. Optional kann später ein direkter Mastodon-Client im Dashboard ergänzt werden.
+- Mastodon-Anbindung: API-Integration und Posting sind implementiert.
 - Optionaler externer Speicherdienst: Evaluierung einer Nextcloud-/WebDAV-Schnittstelle für Medien, als Alternative zum lokalen Filesystem für Nutzer:innen mit bestehender Nextcloud-Installation.
 
 ---

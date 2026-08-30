@@ -13,7 +13,6 @@ Jeder Workspace besitzt ein eigenes `__tests__`-Wurzelverzeichnis, unter dem all
 **Aktuelle Testpfade:**
 - `backend/__tests__/**/*.test.{js,ts,jsx,tsx}`
 - `dashboard/__tests__/**/*.test.{js,ts,jsx,tsx}`
-- `bsky-client/__tests__/**/*.test.{js,ts,jsx,tsx}`
 - `packages/shared-ui/__tests__/components/**/*.test.{js,ts,jsx,tsx}`
 - `packages/media-pickers/__tests__/**/*.test.{js,ts,jsx,tsx}` (geplant, derzeit ohne Tests)
 
@@ -103,7 +102,6 @@ Tests werden immer dort abgelegt, wo sie logisch hingehören:
 |-----------------|------------------------------------------------|
 | Backend         | `backend/__tests__/...`                       |
 | Dashboard       | `dashboard/__tests__/...`                     |
-| BSky Client     | `bsky-client/__tests__/...`                   |
 | Shared-UI       | `packages/shared-ui/__tests__/components/...` |
 | Media-Pickers   | `packages/media-pickers/__tests__/...` (Ziel) |
 | Manuelle Tests  | `docs/tests/...`                              |

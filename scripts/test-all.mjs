@@ -11,7 +11,6 @@ const COLORS = {
 const TEST_TASKS = [
   { name: 'root', args: ['npm', ['run', 'test']] },
   { name: 'dashboard', args: ['npm', ['run', 'test', '--workspace', 'dashboard']] },
-  { name: 'bsky-client', args: ['npm', ['run', 'test', '--workspace', 'bsky-client']] },
   { name: 'packages/shared-ui', args: ['npm', ['run', 'test', '--workspace', 'packages/shared-ui']] }
 ]
 

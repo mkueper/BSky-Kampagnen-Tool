@@ -23,21 +23,6 @@ Hinweis:
 - `dashboard/src/components/layout/AppLayout.jsx:142` aria-label: `Navigation einklappen`
 - `dashboard/src/components/layout/AppLayout.jsx:143` title: `Navigation einklappen`
 
-### bsky-client
-- `bsky-client/src/modules/layout/SidebarNav.jsx:163` aria-label: `Hauptnavigation`
-- `bsky-client/src/modules/layout/BskyClientLayout.jsx:57` aria-label: `Mobile Navigation`
-- `bsky-client/src/modules/login/LoginView.jsx:141` placeholder: `name.bsky.social`
-- `bsky-client/src/modules/login/LoginView.jsx:169` placeholder: `xxxx-xxxx-xxxx-xxxx`
-- `bsky-client/src/modules/composer/Composer.jsx:669` placeholder: `Was moechtest du posten?`
-- `bsky-client/src/modules/composer/Composer.jsx:699` title: `Emoji auswaehlen`
-- `bsky-client/src/modules/composer/Composer.jsx:701` aria-label: `Emoji auswaehlen`
-- `bsky-client/src/modules/composer/Composer.jsx:749` title: `Link-Vorschau entfernen`
-- `bsky-client/src/modules/composer/Composer.jsx:840` title: `Bild hinzufuegen`
-- `bsky-client/src/modules/shared/MediaLightbox.jsx:154` aria-label: `Schliessen`
-- `bsky-client/src/modules/shared/MediaLightbox.jsx:215` aria-label: `Schliessen`
-- `bsky-client/src/modules/shared/MediaLightbox.jsx:226` aria-label: `Vorheriges Bild`
-- `bsky-client/src/modules/shared/MediaLightbox.jsx:234` aria-label: `Naechstes Bild`
-
 ### shared-ui
 - `packages/shared-ui/src/components/ThreadComposer.jsx:902` title: `Emoji einfuegen`
 - `packages/shared-ui/src/components/ThreadComposer.jsx:903` aria-label: `Emoji einfuegen`
@@ -61,15 +46,6 @@ Hinweis:
 - `dashboard/src/components/ThreadOverview.jsx:793` `Post {segment.sequence + 1}`
 - `dashboard/src/components/ThreadForm.jsx:791` `Thread wird geladen…`
 
-### bsky-client
-- `bsky-client/src/modules/composer/Composer.jsx:658` `Inhalt`
-- `bsky-client/src/modules/composer/Composer.jsx:691` `GIF` (sr-only)
-- `bsky-client/src/modules/composer/Composer.jsx:710` `Vorschau`
-- `bsky-client/src/modules/shared/ProfilePreview.jsx:52` `Keine Profildaten gefunden.`
-- `bsky-client/src/modules/shared/ProfilePreview.jsx:89` `Follower`
-- `bsky-client/src/modules/shared/ProfilePreview.jsx:93` `Folgt`
-- `bsky-client/index.html:6` `<title>BSky Client</title>`
-
 ### shared-ui
 - `packages/shared-ui/src/components/ThreadComposer.jsx:987` `Bild`
 - `packages/shared-ui/src/components/ThreadComposer.jsx:1007` `GIF`
@@ -79,4 +55,3 @@ Hinweis:
 
 ### media-pickers
 - `packages/media-pickers/src/components/GifPicker.jsx:488` `Keine weiteren GIFs verfuegbar.`
-

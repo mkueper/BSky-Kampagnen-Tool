@@ -52,7 +52,7 @@ Datei: `api-anweisungen.md`
 
 ---
 
-## 3. UI (Dashboard & BSky-Client)
+## 3. UI (Dashboard)
 
 ### 3.1 Konventionen
 

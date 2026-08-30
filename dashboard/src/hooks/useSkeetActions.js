@@ -164,10 +164,46 @@ export function useSkeetActions ({
     }
   }, [navigate, refreshSkeetsNow, setActiveDashboardTab, toast])
 
+  const updateRecurringStatus = useCallback((skeet, action) => {
+    if (!skeet?.id) return
+    const isPausing = action === 'pause'
+    openConfirm({
+      title: isPausing ? 'Post pausieren' : 'Post fortsetzen',
+      description: isPausing
+        ? 'Die Wiederholung wird bis zum Fortsetzen ausgesetzt.'
+        : 'Der nächste reguläre zukünftige Termin wird geplant.',
+      confirmLabel: isPausing ? 'Pausieren' : 'Fortsetzen',
+      variant: isPausing ? 'secondary' : 'primary',
+      onConfirm: async () => {
+        try {
+          const res = await fetchWithCsrf(`/api/skeets/${skeet.id}/${action}`, { method: 'POST' })
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}))
+            throw new Error(data.error || 'Statusänderung fehlgeschlagen.')
+          }
+          await refreshSkeetsNow({ force: true })
+          toast.success({
+            title: isPausing ? 'Post pausiert' : 'Post fortgesetzt',
+            description: isPausing
+              ? 'Die Wiederholung wird nicht mehr automatisch versendet.'
+              : 'Der nächste reguläre Termin wurde geplant.'
+          })
+        } catch (error) {
+          toast.error({
+            title: isPausing ? 'Pausieren fehlgeschlagen' : 'Fortsetzen fehlgeschlagen',
+            description: error.message || 'Statusänderung fehlgeschlagen.'
+          })
+        }
+      }
+    })
+  }, [openConfirm, refreshSkeetsNow, toast])
+
   return {
     handleDelete,
     handleRetract,
     handlePermanentDelete,
-    handleRestore
+    handleRestore,
+    handlePause: skeet => updateRecurringStatus(skeet, 'pause'),
+    handleResume: skeet => updateRecurringStatus(skeet, 'resume')
   }
 }

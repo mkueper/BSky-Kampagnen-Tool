@@ -24,6 +24,7 @@ function DashboardView ({
   publishedSkeets,
   deletedSkeets,
   pendingSkeets,
+  pausedSkeets,
   onEditSkeet,
   onDeleteSkeet,
   onRetractSkeet,
@@ -48,7 +49,9 @@ function DashboardView ({
   highlightedSkeetId = null,
   onHighlightConsumed,
   onPublishPendingOnce,
-  onDiscardPendingSkeet
+  onDiscardPendingSkeet,
+  onPauseSkeet,
+  onResumeSkeet
 }) {
   const { t } = useTranslation()
   const toast = useToast()
@@ -233,6 +236,16 @@ function DashboardView ({
                       {t('posts.activity.tabs.pending', 'Wartend')}
                     </Tabs.Trigger>
                     <Tabs.Trigger
+                      value='paused'
+                      className={`whitespace-nowrap rounded-full px-4 py-2 transition ${
+                        activeTab === 'paused'
+                          ? 'bg-background-elevated shadow-soft'
+                          : 'text-foreground-muted hover:text-foreground'
+                      }`}
+                    >
+                      {t('posts.activity.tabs.paused', 'Pausiert')}
+                    </Tabs.Trigger>
+                    <Tabs.Trigger
                       value='deleted'
                       className={`whitespace-nowrap rounded-full px-4 py-2 transition ${
                         activeTab === 'deleted'
@@ -284,6 +297,8 @@ function DashboardView ({
                 skeets={filteredPlannedSkeets}
                 onEdit={onEditSkeet}
                 onDelete={onDeleteSkeet}
+                onPause={onPauseSkeet}
+                onResume={onResumeSkeet}
                 getRepeatDescription={getRepeatDescription}
                 highlightedId={highlightedSkeetId}
               />
@@ -326,11 +341,22 @@ function DashboardView ({
               onPermanentDelete={onPermanentDeleteSkeet}
               formatTime={formatTime}
             />
+          ) : activeTab === 'paused' ? (
+            <PlannedSkeetList
+              skeets={pausedSkeets}
+              onEdit={onEditSkeet}
+              onDelete={onDeleteSkeet}
+              onPause={onPauseSkeet}
+              onResume={onResumeSkeet}
+              getRepeatDescription={getRepeatDescription}
+            />
           ) : (
             <PlannedSkeetList
               skeets={pendingSkeets}
               onEdit={onEditSkeet}
               onDelete={onDeleteSkeet}
+              onPause={onPauseSkeet}
+              onResume={onResumeSkeet}
               getRepeatDescription={getRepeatDescription}
               highlightedId={highlightedSkeetId}
               showPendingActions

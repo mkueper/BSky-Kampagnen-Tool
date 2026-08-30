@@ -148,6 +148,32 @@ async function restoreSkeet(req, res) {
   }
 }
 
+async function pauseSkeet(req, res) {
+  try {
+    const skeet = await skeetService.pauseRecurringSkeet(req.params.id);
+    res.json(skeet);
+  } catch (error) {
+    sendControllerError(res, error, {
+      defaultStatus: 400,
+      notFoundPatterns: ['nicht gefunden'],
+      fallbackMessage: 'Fehler beim Pausieren des Posts.',
+    });
+  }
+}
+
+async function resumeSkeet(req, res) {
+  try {
+    const skeet = await skeetService.resumeRecurringSkeet(req.params.id);
+    res.json(skeet);
+  } catch (error) {
+    sendControllerError(res, error, {
+      defaultStatus: 400,
+      notFoundPatterns: ['nicht gefunden'],
+      fallbackMessage: 'Fehler beim Fortsetzen des Posts.',
+    });
+  }
+}
+
 module.exports = {
   getSkeets,
   createSkeet,
@@ -155,6 +181,8 @@ module.exports = {
   deleteSkeet,
   retractSkeet,
   restoreSkeet,
+  pauseSkeet,
+  resumeSkeet,
   async publishNow(req, res) {
     try {
       const id = await scheduler.publishSkeetNow(req.params.id);

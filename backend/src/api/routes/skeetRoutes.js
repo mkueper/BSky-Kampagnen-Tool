@@ -12,6 +12,8 @@ router.patch('/:id', skeetController.updateSkeet);
 router.delete('/:id', skeetController.deleteSkeet);
 router.post('/:id/retract', skeetController.retractSkeet);
 router.post('/:id/restore', skeetController.restoreSkeet);
+router.post('/:id/pause', skeetController.pauseSkeet);
+router.post('/:id/resume', skeetController.resumeSkeet);
 router.post('/:id/publish-now', skeetController.publishNow);
 router.get('/:id/history', skeetHistoryController.getSkeetHistory);
 

@@ -3,7 +3,6 @@ const path = require('path')
 const fs = require('fs')
 const http = require('http')
 const os = require('os')
-const { registerTempFileBridge } = require('./tempBridge')
 const { loadWindowState, persistWindowState } = require('./windowState')
 
 // Ensure Chromium sandbox is disabled on Linux AppImage before any browser process spawns
@@ -108,7 +107,6 @@ function startBackend () {
 }
 
 function createWindow () {
-  registerTempFileBridge(app)
   const backendPort = startBackend()
   const state = loadWindowState(app)
   const browserOpts = {
@@ -117,7 +115,6 @@ function createWindow () {
     x: state.x,
     y: state.y,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false
@@ -196,7 +193,7 @@ function createWindow () {
   if (devUrl) {
     mainWindow.loadURL(devUrl)
   } else {
-    // In prod: Backend dient auch die statischen bsky-client-Dateien aus
+    // In prod: Backend dient die statischen Dashboard-Dateien aus.
     // Warten, bis der Server lauscht
     waitForServer(backendPort, 30000)
       .then(() => mainWindow.loadURL(`http://127.0.0.1:${backendPort}`))

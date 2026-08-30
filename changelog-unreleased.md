@@ -145,7 +145,6 @@
 
 ### Docs
 
-- **New:** vollständige technische Dokumentation der ListView-Architektur (`listView-architecture.md`).
 - **Improvement:** Meta-Struktur, Schlüssel, Lebenszyklus und UI-Verhalten einheitlich erklärt.
 
 # ---

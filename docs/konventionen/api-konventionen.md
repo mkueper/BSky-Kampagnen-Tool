@@ -11,7 +11,7 @@ Diese Konventionen gelten für:
 
 - alle HTTP-Endpunkte des Backends (REST/JSON),
 - interne API-Module unter `backend/src/api/**`,
-- service-interne API-Fassaden (z. B. Bluesky, Scheduler, Dashboard).
+- service-interne API-Fassaden (z. B. Plattform-Services, Scheduler, Dashboard).
 
 ---
 
@@ -37,8 +37,7 @@ Diese Konventionen gelten für:
   - `/api/threads` – Listen/Erstellen/Aktualisieren/Löschen von Threads  
   - `/api/settings/scheduler` – Scheduler-Konfiguration  
   - `/api/settings/client-polling` – Dashboard-Polling-Konfiguration  
-  - `/api/client-config` – zusammengeführte Client-Konfiguration  
-  - `/api/bsky/timeline` – Datenquelle für den integrierten Bluesky-Client  
+  - `/api/client-config` – zusammengeführte Dashboard-Konfiguration
 
 - HTTP-Verben (Soll):
   - `GET` – lesen (keine Seiteneffekte)  
@@ -152,7 +151,7 @@ Keine sensiblen Daten in Fehlermeldungen oder Logs.
 
 ## 9. Interne APIs / Module
 
-#### Für interne API-Fassaden (z. B. Bluesky-Client, Scheduler):
+#### Für interne API-Fassaden (z. B. Plattform-Service, Scheduler):
 
 - Funktionale Schnittstellen klar typisieren (Parameter-Objekte statt „Argument-Salat“).
 - Rückgaben als klar strukturierte Objekte:

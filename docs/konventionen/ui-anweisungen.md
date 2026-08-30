@@ -1,6 +1,6 @@
 # UI-Anweisungen
 
-**Prompt-Anweisungen für Codex bei UI-Aufgaben (Dashboard & BSky-Client)**
+**Prompt-Anweisungen für Codex bei UI-Aufgaben im Dashboard**
 
 Dieser Block ist dafür gedacht, bei UI-bezogenen Aufgaben an Codex übergeben zu werden.
 Er enthält nur die **kompakten, strikt einzuhaltenden Regeln**, basierend auf den vollständigen UI-Konventionen.
@@ -42,7 +42,7 @@ Testing-Regeln:
 
 Aufgabe:
 [Hier folgt die konkrete UI-Anweisung, z. B.:
-"Passe die FloatingToolbar in bsky-client/src/components/... an, sodass sie nur eingeblendet wird, wenn IDs vorhanden sind."]
+"Passe die FloatingToolbar in dashboard/src/components/... an, sodass sie nur eingeblendet wird, wenn IDs vorhanden sind."]
 
 Wichtig:
 Wenn eine Anweisung unklar ist oder Annahmen nötig wären, triffst du keine eigenen Entscheidungen,  

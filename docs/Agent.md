@@ -23,7 +23,7 @@ Der Kampagnen-Agent bildet die Automatisierungsschicht des Projekts. Er orchestr
 | **Scheduler**       | Cron-basierter Poller, Backoff/Retries, Wiederholungslogik (daily/weekly/monthly) |
 | **Engagement**      | Aggregation von Likes/Reposts, Aufbereitung von Replies, Pflege von `SkeetReactions` und `Replies` |
 | **Realtime**        | SSE-Events (`skeet:updated`, `thread:updated`, `…`) und Heartbeat-gesteuerte Drosselung des Collectors |
-| **Tools & Integrationen** | Tenor-GIF-Proxy, direkte Bluesky-Aktionen, Maintenance-Utilities |
+| **Tools & Integrationen** | Tenor-GIF-Proxy, Link-Vorschau-Service, Maintenance-Utilities |
 
 ---
 
@@ -31,7 +31,7 @@ Der Kampagnen-Agent bildet die Automatisierungsschicht des Projekts. Er orchestr
 
 - Geplante Inhalte aus dem Dashboard (`POST /api/skeets`, `POST /api/threads`)
 - Medien-Uploads (Temp-Uploads, Skeet-/Thread-Medien)
-- Scheduler- und Client-Polling-Konfiguration (`PUT /api/settings/*`)
+- Scheduler- und Dashboard-Polling-Konfiguration (`PUT /api/settings/*`)
 - Zugangsdaten aus `.env` bzw. via `/api/config/credentials`
 
 ## Ausgaben
@@ -45,7 +45,7 @@ Der Kampagnen-Agent bildet die Automatisierungsschicht des Projekts. Er orchestr
 
 ## Interaktionsflächen
 
-- **Benutzer:innen:** arbeiten ausschließlich über das Dashboard (Planung, Konfiguration, Direkt-Client).
+- **Benutzer:innen:** arbeiten ausschließlich über das Dashboard (Planung, Konfiguration und Auswertung).
 - **Datenbank:** persistiert Threads, Skeets, Medien, Reaktionen und Settings (siehe `docs/database.md`).
 - **Scheduler:** `backend/src/core/services/scheduler.js` übernimmt Taktung, Backoff und Wiederholungslogik.
 - **Presence-Service:** `POST /api/heartbeat` aktualisiert den letzten Aktivitätszeitpunkt eines Clients.
@@ -82,7 +82,6 @@ Die Baseline-Migration wird beim Serverstart automatisch angewandt. Zusätzliche
 3. **Ergebnisverarbeitung:** Erfolgreiche oder fehlgeschlagene Plattformantworten landen in `platformResults`. Der Agent plant bei Bedarf Wiederholungen (daily/weekly/monthly) oder markiert den Eintrag als veröffentlicht.
 4. **Realtime-Update:** Über `events.emit('thread:updated', …)` bzw. `events.emit('skeet:updated', …)` wird das Dashboard informiert und aktualisiert seine Listen ohne Polling.
 5. **Engagement:** Entweder on-demand (Button im Dashboard) oder automatisch (Zeitplan des Collectors) ruft der Agent `threadEngagementService` bzw. `engagementService` auf, speichert Kennzahlen und sendet weitere SSE-Events.
-6. **Direktaktionen:** Der integrierte Bluesky-Client nutzt dieselben Service-Schichten, um Timeline, Likes oder das Posten in Echtzeit zu ermöglichen – ohne die geplanten Kampagnen zu beeinflussen.
 
 ---
 

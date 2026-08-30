@@ -1,6 +1,6 @@
 # Datenbankhandbuch
 
-Dieser Leitfaden fasst das aktuelle Schema, die wichtigsten Tabellen und bewährte Abläufe für Pflege & Migrationen zusammen. Basis ist der Zustand des Haupt-Branches (2025).
+Dieser Leitfaden fasst das aktuelle Schema, die wichtigsten Tabellen und bewährte Abläufe für Pflege & Migrationen zusammen.
 
 ---
 
@@ -21,7 +21,7 @@ Dieser Leitfaden fasst das aktuelle Schema, die wichtigsten Tabellen und bewähr
 | `SkeetReactions`     | Pro-Segment-Reaktionen (Replies, Likes etc.)                          |
 | `Replies`            | Aggregierte Antworten auf veröffentlichte Skeets                      |
 | `PostSendLogs`       | Historie von Versandversuchen je Skeet/Plattform                      |
-| `Settings`           | Key-Value-Store für Scheduler-/Client-Konfiguration                   |
+| `Settings`           | Key-Value-Store für Scheduler-/Dashboard-Konfiguration                |
 
 ---
 
@@ -43,8 +43,9 @@ Dieser Leitfaden fasst das aktuelle Schema, die wichtigsten Tabellen und bewähr
 - **Anwendung:** Dateien liegen im Upload-Verzeichnis (`UPLOAD_DIR`, Standard `data/medien`). Reihenfolge wird über `order` gesteuert.
 
 ### Skeets (`Skeets`)
-- **Felder:** `content`, `scheduledAt`, `scheduledPlannedAt`, `repeatAnchorAt`, `postUri`, `likesCount`, `repostsCount`, `postedAt`, `repeat`, `repeatDayOfWeek`, `repeatDayOfMonth`, `threadId`, `isThreadPost`, `targetPlatforms` (JSON), `platformResults` (JSON).
+- **Felder:** `content`, `scheduledAt`, `scheduledPlannedAt`, `repeatAnchorAt`, `status`, `pendingReason`, `postUri`, `likesCount`, `repostsCount`, `postedAt`, `repeat`, `repeatDayOfWeek`, `repeatDayOfMonth`, `threadId`, `isThreadPost`, `targetPlatforms` (JSON), `platformResults` (JSON).
 - `scheduledPlannedAt` hält die geplante Uhrzeit (ohne Jitter); `scheduledAt` speichert den tatsächlichen Ausführungszeitpunkt (inkl. Zufallsversatz). `repeatAnchorAt` bleibt die driftfreie Basiszeit für wiederkehrende Skeets.
+- **Status:** `draft|scheduled|paused|pending_manual|sent|skipped|error`. `paused` ist ausschließlich für wiederkehrende Posts vorgesehen und wird beim Fortsetzen wieder zu `scheduled`.
 - **Soft-Delete:** `paranoid: true` → `deletedAt`.
 - **Indices:** auf `scheduledAt`, `threadId`, `deletedAt`.
 - **Validierungen:** Pflichttermin bei `repeat = 'none'`, Wiederholungswerte bei `weekly`/`monthly`, gültige Plattformen.
@@ -66,7 +67,7 @@ Dieser Leitfaden fasst das aktuelle Schema, die wichtigsten Tabellen und bewähr
 - Wird vom Scheduler (`logPostSendAttempt`) und von Lösch-/Retract-Operationen (`logPlatformEvent`) beschrieben und dient u. a. als Grundlage für die Sendehistorie im Dashboard.
 
 ### Settings (`Settings`)
-- Key-Value-Speicher (`key` eindeutig). Aktuelle Keys siehe `backend/src/core/services/settingsService.js` (`SCHEDULE_TIME`, `TIME_ZONE`, `POST_RETRIES`, `POST_BACKOFF_MS`, `POST_BACKOFF_MAX_MS`, `SCHEDULER_GRACE_WINDOW_MINUTES`, `SCHEDULER_RANDOM_OFFSET_MINUTES` sowie Client-Polling-Overrides).
+- Key-Value-Speicher (`key` eindeutig). Aktuelle Keys siehe `backend/src/core/services/settingsService.js` (`SCHEDULE_TIME`, `TIME_ZONE`, `POST_RETRIES`, `POST_BACKOFF_MS`, `POST_BACKOFF_MAX_MS`, `SCHEDULER_GRACE_WINDOW_MINUTES`, `SCHEDULER_RANDOM_OFFSET_MINUTES` sowie Dashboard-Polling-Overrides).
 
 ---
 
@@ -113,7 +114,7 @@ Dieser Leitfaden fasst das aktuelle Schema, die wichtigsten Tabellen und bewähr
 2. Model in `backend/src/data/models/*.js` anpassen (Datentypen, Defaults, Hooks).
 3. Services/Controller aktualisieren.
 4. Dokumentation (dieses Dokument, README, API-Doku) ergänzen.
-5. Tests/Fixtures prüfen (`backend/tests`).
+5. Tests/Fixtures prüfen (`backend/__tests__`).
 
 ---
 

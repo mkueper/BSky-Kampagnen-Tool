@@ -24,7 +24,6 @@ Allgemeine Test-Regeln:
 - Tests gehören in die zentralen Testordner der Workspaces:
   - backend/__tests__/
   - dashboard/__tests__/
-  - bsky-client/__tests__/
   - packages/shared-ui/__tests__/components/
   - (zukünftig) packages/media-pickers/__tests__/.
 - Co-located Tests direkt neben Komponenten (z. B. src/components/Button.test.jsx) werden im Projekt nicht mehr verwendet.
@@ -49,7 +48,7 @@ Stabilität:
 
 Aufgabe:
 [Hier folgt die konkrete Test-Anweisung, z. B.:
-"Füge in bsky-client/src/modules/notifications/Notifications.test.jsx einen Test hinzu, der prüft, dass bei unreadCount > 0 ein Badge mit der richtigen Zahl angezeigt wird."]
+"Füge in dashboard/__tests__/components/NotificationBadge.test.jsx einen Test hinzu, der prüft, dass bei unreadCount > 0 ein Badge mit der richtigen Zahl angezeigt wird."]
 
 Wichtig:
 Wenn eine Anweisung unklar ist oder Annahmen nötig wären, triffst du keine eigenen Entscheidungen,

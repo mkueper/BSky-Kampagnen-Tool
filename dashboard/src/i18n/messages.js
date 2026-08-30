@@ -302,6 +302,7 @@ const messages = {
           planned: 'Geplant',
           published: 'Veröffentlicht',
           pending: 'Freizugeben',
+          paused: 'Pausiert',
           deleted: 'Papierkorb'
         },
         search: {
@@ -338,6 +339,8 @@ const messages = {
             'Der Planer kann verwendet werden, um erste Posts zu terminieren.',
           edit: 'Bearbeiten',
           remove: 'Löschen',
+          pause: 'Pausieren',
+          resume: 'Fortsetzen',
           publishNow: 'Senden',
           skipOnce: 'Verwerfen',
           publishNowTitle: 'Verpassten Post einmalig senden',
@@ -1371,6 +1374,7 @@ const messages = {
           planned: 'Scheduled',
           published: 'Published',
           pending: 'To approve',
+          paused: 'Paused',
           deleted: 'Trash'
         },
         search: {
@@ -1407,6 +1411,8 @@ const messages = {
             'Use the planner to schedule your first posts.',
           edit: 'Edit',
           remove: 'Delete',
+          pause: 'Pause',
+          resume: 'Resume',
           publishNow: 'Send',
           skipOnce: 'Discard',
           publishNowTitle: 'Send missed post once',

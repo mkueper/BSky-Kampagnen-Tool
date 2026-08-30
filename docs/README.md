@@ -1,6 +1,6 @@
 # Dokumentationsübersicht
 
-Dieser Bereich bündelt die begleitende Dokumentation für den **BSky-Kampagnen-Tool**. Sie richtet sich an Entwickler:innen, Operator:innen und Beitragende, die Architektur, Installation, Betrieb und Planung nachvollziehen möchten.
+Dieser Bereich bündelt die begleitende Dokumentation für das **BSky-Kampagnen-Tool**. Sie richtet sich an Entwickler:innen, Operator:innen und Beitragende, die Architektur, Installation, Betrieb und Planung nachvollziehen möchten.
 
 ---
 
@@ -51,7 +51,7 @@ Eine aktuelle Screenshot‑Sammlung findest du im Abschnitt "Screenshots" des
 
 ## Meta-Dokumentation
 
-Die Datei [`DOCS.md`](./DOCS.md) enthält eine Bestandsaufnahme aller Markdown-Dokumente im Repository (Stand 2025‑12‑02). Für die inhaltliche Navigation ist diese Übersichtsseite (`docs/README.md`) maßgeblich.
+Die Datei [`DOCS.md`](./DOCS.md) enthält die aktuelle Dokumentationsstruktur. Für den inhaltlichen Einstieg ist diese Übersichtsseite (`docs/README.md`) maßgeblich.
 
 ---
 

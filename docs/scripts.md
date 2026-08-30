@@ -1,16 +1,16 @@
 # npm Scripts & Workspace-Befehle
 
-Schnelle Referenz zu allen wichtigen CLI-Befehlen. Die Skripte befinden sich in der Root-`package.json`, nutzen aber häufig Workspaces wie `dashboard`, `bsky-client` oder `packages/shared-ui`.
+Schnelle Referenz zu allen wichtigen CLI-Befehlen. Die Skripte befinden sich in der Root-`package.json`, nutzen aber häufig Workspaces wie `dashboard` oder `packages/shared-ui`.
 
 ## Tests & Qualität
 
 | Script | Beschreibung |
 | --- | --- |
-| `npm run test` | Führt die Vitest-Suite gemäß `vitest.config.mjs` aus (Backend + Frontends + Shared-Logic, je nach Include-Globs). |
+| `npm run test` | Führt die Vitest-Suite gemäß `vitest.config.mjs` aus (Backend, Dashboard und Shared-UI, je nach Include-Globs). |
 | `npm run test:ui` | Startet Vitest im UI-Modus. |
-| `npm run test:all` | Testet Backend, Dashboard, Bsky-Client und Shared-UI nacheinander (Workspaces). |
+| `npm run test:all` | Testet Backend, Dashboard und Shared-UI nacheinander (Workspaces). |
 | `npm run lint` / `npm run lint:fix` | ESLint-Check bzw. Auto-Fix im gesamten Repo. |
-| `npm run lint:all` | Lintet zusätzlich Backend, Dashboard, Bsky-Client, Media-Pickers und Shared-UI. |
+| `npm run lint:all` | Lintet zusätzlich Backend, Dashboard, Media-Pickers und Shared-UI. |
 | `npm run typecheck` | TypeScript-Typprüfung (kein Emit). |
 | `npm run ci:verify` | Hilfsskript, das Lockfiles prüft (GitHub-Workflow nutzt es). |
 
@@ -20,7 +20,7 @@ Schnelle Referenz zu allen wichtigen CLI-Befehlen. Die Skripte befinden sich in 
 | --- | --- |
 | `npm run dev` | Backend-Entwicklung mit Nodemon. |
 | `npm run dev:frontend` | Vite-Dev-Server des Dashboards (Workspace). |
-| `npm run dev:bsky-client` | Dev-Server für den Bluesky-Client (Workspace). |
+| `npm run dev:app` | Startet Backend und Dashboard-Dev-Server gemeinsam. |
 | `npm run dev:electron` | Startet Dashboard-Dev-Server und Electron-App parallel. |
 | `npm run start` | Backend in Production-Mode (ohne Nodemon). |
 | `npm run start:dev` / `start:test` / `start:prod` | Backend mit passendem `.env`-Switch. |
@@ -32,13 +32,11 @@ Schnelle Referenz zu allen wichtigen CLI-Befehlen. Die Skripte befinden sich in 
 | `npm run build` | Alias für `build:backend` (Placeholder). |
 | `npm run build:backend` | Placeholder (Backend benötigt keinen Build). |
 | `npm run build:frontend` | Dashboard-Production-Build (Workspace). |
-| `npm run build:bsky-client` | Bsky-Client-Build (Workspace). |
 | `npm run build:shared-ui` | Platzhalter: gibt nur einen Hinweis aus (Shared UI wird direkt aus `src/` konsumiert). |
-| `npm run build:all` | Fasst Backend, Bsky-Client, Dashboard, Shared-UI & Media-Pickers zusammen und zeigt am Ende eine Erfolgsübersicht. |
+| `npm run build:all` | Fasst Backend, Dashboard, Shared-UI & Media-Pickers zusammen und zeigt am Ende eine Erfolgsübersicht. |
 | `npm run build:electron` / `build:electron:win` | Electron-Build (Linux/Windows). |
 | `npm run pack:electron` | Electron im Pack-Modus (dir). |
 | `npm run docker:build` / `docker:bundle` | Docker Compose Build & Bundle-Skript (Backend/Dashboard); optional `--scp`/`-c` für Upload per `scp` (Ziel aus `scripts/target.conf`). |
-| `npm run docker:bundle:bsky-client` | Docker-Bundle für den Bluesky-Client (Zip für Docker Compose); optional `--scp`/`-c` für Upload per `scp` (Ziel aus `scripts/target.conf`). |
 
 ## Install & Infrastruktur
 
@@ -46,7 +44,6 @@ Schnelle Referenz zu allen wichtigen CLI-Befehlen. Die Skripte befinden sich in 
 | --- | --- |
 | `npm run install:all` | Installiert alle Workspaces (inkl. Root). |
 | `npm run install:frontend` | Dashboard-Abhängigkeiten installieren. |
-| `npm run install:bsky-client` | Bsky-Client-Abhängigkeiten installieren. |
 | `npm run switchenv:dev` / `switchenv:prod` | Aktiviert passendes `.env`-Set über `scripts/switch-env.js`. |
 
 ## Datenbank & Migrationen
@@ -65,7 +62,6 @@ Schnelle Referenz zu allen wichtigen CLI-Befehlen. Die Skripte befinden sich in 
 | --- | --- |
 | `npm run smoke:bsky` / `smoke:masto` | Testpost an Bluesky bzw. Mastodon. |
 | `npm run docker:bundle` | Bündelt Docker-Artefakte (Backend/Dashboard); optional `--scp`/`-c` für Upload per `scp`. |
-| `npm run docker:bundle:bsky-client` | Bündelt Docker-Artefakte für den Bluesky-Client; optional `--scp`/`-c` für Upload per `scp`. |
 
 Hinweis für SCP-Uploads: `scripts/target.conf` erwartet eine Zeile wie `TARGET_SCP="user@host:/pfad/zum/ziel/"` (für mehrere Ziele kannst du die Zeile nach Bedarf umkommentieren/ersetzen).
 | `npm run changelog:add` / `:note` / `:release` / `:lint` | Hilfs-CLI zur Pflege von `changelog-unreleased.md`. |
@@ -74,7 +70,6 @@ Hinweis für SCP-Uploads: `scripts/target.conf` erwartet eine Zeile wie `TARGET_
 ## Workspace-spezifische Hinweise
 
 - **Dashboard** (`dashboard/package.json`): besitzt eigene `dev`, `build`, `test`, `lint` Skripte; werden über die Root-Skripte angesprochen.
-- **Bsky-Client** (`bsky-client/package.json`): analog Dashboard mit Vite/Vitest.
 - **Shared-UI** (`packages/shared-ui/package.json`): `build` ist ein No-Op (Shared UI wird direkt aus `src/` konsumiert); `verify` führt `lint` + `test` aus.
 - **Media-Pickers** (`packages/media-pickers/package.json`): `build`/`lint` sind Platzhalter, da der Code eingecheckt ist.
 

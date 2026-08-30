@@ -14,5 +14,3 @@
 - `app.bsky.notification.unregisterPush` (`POST /xrpc/app.bsky.notification.unregisterPush`)
   - Parameter entsprechen `registerPush` ohne `ageRestricted`.
   - Entfernt bestehende Push-Registrierungen; ebenfalls `{ success: boolean }` als Antwort.
-- Frontend: `registerPushSubscription`/`unregisterPushSubscription` (siehe `bsky-client/src/modules/shared/api/bsky.js`) nutzen standardmäßig einen konfigurierbaren Transport und können über `configurePushTransport()` bzw. `window.__BSKY_PUSH_TRANSPORT__ = { register, unregister }` umgestellt werden.
-- Direkter Bluesky-Transport steht via `createBskyAgentPushTransport({ service, identifier, appPassword })` bereit und wird ohne `.env` entweder explizit via `configurePushTransport(createBskyAgentPushTransport(...))` oder implizit über `window.__BSKY_DIRECT_PUSH_CONFIG__ = { service?, identifier, appPassword }` vor App-Start aktiviert.

@@ -34,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
        * Status-Semantik (STRING, kein ENUM):
        * - draft         – Entwurf im Dashboard (noch nicht aktiv für den Scheduler)
        * - scheduled     – normal geplant, kann automatisch gepostet werden
+       * - paused        – wiederkehrend geplant, aber bis zum Fortsetzen ausgesetzt
        * - sent          – erfolgreich gesendet
        * - pending_manual – war fällig, als der Scheduler nicht aktiv war → benötigt manuelle Freigabe
        * - skipped       – vom User verworfen

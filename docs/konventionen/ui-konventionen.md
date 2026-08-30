@@ -1,8 +1,8 @@
 # UI-Konventionen
 
-**BSky-Kampagnen-Tool – UI-Leitfaden für Dashboard & BSky-Client**
+**BSky-Kampagnen-Tool – UI-Leitfaden für das Dashboard**
 
-Dies ist der zentrale, menschlich lesbare Styleguide für alle UI-Entwicklungen im Dashboard und im BSky-Client.
+Dies ist der zentrale, menschlich lesbare Styleguide für alle UI-Entwicklungen im Dashboard.
 Er vereint die allgemeinen Prinzipien konsistenter UI-Entwicklung mit den projektspezifischen Komponenten, Patterns und Layout-Regeln.
 
 ---
@@ -155,9 +155,9 @@ Alle Zustände (disabled, focus) vorgegeben.
 
 ### Navigation
 
-* NAV-Pane (links): persistent, nicht view-abhängig
-* Content-Pane: Hauptbereich aller Views
-* Detail-Pane: Threads, ProfileViewer, Hashtag-Search
+* Die Sidebar ist persistent und enthält die Hauptnavigation.
+* Der Hauptbereich zeigt die aktive Ansicht für Übersicht, Posts, Threads, Konfiguration oder Projektinformationen.
+* Post- und Thread-Details sowie Bestätigungen werden als Karten oder Dialoge innerhalb des Dashboard-Kontexts dargestellt.
 
 ### Laden & Fehler
 
@@ -173,32 +173,22 @@ Alle Zustände (disabled, focus) vorgegeben.
 
 ---
 
-## 7. Pane-Zuordnung
+## 7. Bereichszuordnung
 
-### 7.1 NAV-Pane (linke Sidebar)
+### 7.1 Sidebar
 
-* Dauerhafte Navigation
-* Schnellaktionen: Compose, Theme, Feeds
+* Dauerhafte Hauptnavigation und Theme-Umschalter.
 
-### 7.2 Content-Pane (Hauptbereich)
+### 7.2 Hauptbereich
 
-* Home-Timeline / Tabs
-* Globale Suche
-* Notifications
-* Settings, Blocks, Saved
-* Inhalt bleibt im DOM; Blendung via CSS
+* Übersicht, Posts, Threads, Konfiguration und Projektinformationen.
+* Die Post-Aktivität enthält die Tabs „Geplant“, „Pausiert“, „Veröffentlicht“, „Freizugeben“ und „Papierkorb“.
 
-### 7.3 Detail-Pane
+### 7.3 Dialoge
 
-* Thread-Lesefenster (kompletter Baum)
-* ProfileViewer (Modal-Ersatz)
-* HashtagSearch
-
-### 7.4 Modals
-
-* Composer
 * Medien-Dialoge
 * Bestätigungsdialoge
+* Kontext- und Informationsdialoge
 
 ---
 

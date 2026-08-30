@@ -22,7 +22,7 @@ RUN npm ci \
 # Quellcode kopieren (gefiltert durch .dockerignore)
 COPY . .
 
-# Dashboard-Build (importiert bsky-client als Workspace-Dependency)
+# Dashboard-Build
 RUN npm run --workspace dashboard build
 
 # Stage 2 – gebauten Output über Nginx mit Proxy-Konfiguration ausliefern.

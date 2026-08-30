@@ -63,13 +63,13 @@ Neue Tests sollten durch Hinzufügen eines weiteren Abschnitts im selben Format 
 
 ## backend/__tests__/api/clientConfig.test.js
 
-**Komponente/Bereich:** Endpoint `/api/client-config` für die Dashboard-/Client-Konfiguration.
+**Komponente/Bereich:** Endpoint `/api/client-config` für die Dashboard-Konfiguration.
 
 **Anforderungen (Architektur/Fachkonzept):**
 - **TBD**
 
 **Anforderungen (aus Implementierung):**
-- Die Route MUSS die Client-Konfiguration aus `config.CLIENT_CONFIG`, Datenbank-Overrides (Client-Polling/General Settings) und Laufzeitinformationen (z. B. `needsCredentials`, `platforms.mastodonConfigured`, `gifs.tenorAvailable`) zusammenführen.
+- Die Route MUSS die Dashboard-Konfiguration aus `config.CLIENT_CONFIG`, Datenbank-Overrides (Dashboard-Polling/General Settings) und Laufzeitinformationen (z. B. `needsCredentials`, `platforms.mastodonConfigured`, `gifs.tenorAvailable`) zusammenführen.
 - Die ausgelieferte Konfiguration DARF keine sensiblen Daten (Secrets) enthalten und MUSS ausschließlich nicht-sensitive Werte (Polling, Locale/Zeitzone, Limits, Feature-Flags) exponieren.
 
 **Konzept-Abgleich:** offen
@@ -78,7 +78,7 @@ Neue Tests sollten durch Hinzufügen eines weiteren Abschnitts im selben Format 
 
 ## backend/__tests__/api/clientPollingApi.test.js
 
-**Komponente/Bereich:** Polling-Konfigurations- und Status-Endpunkte für Dashboard-Clients.
+**Komponente/Bereich:** Polling-Konfigurations- und Status-Endpunkte für das Dashboard.
 
 **Anforderungen (Architektur/Fachkonzept):**
 - **TBD**
@@ -353,6 +353,24 @@ Neue Tests sollten durch Hinzufügen eines weiteren Abschnitts im selben Format 
 
 ---
 
+## backend/__tests__/services/recurringSkeetPause.test.js
+
+**Komponente/Bereich:** Pausieren und Fortsetzen wiederkehrender Posts (`skeetService`).
+
+**Anforderungen (Architektur/Fachkonzept):**
+- Wiederkehrende Posts können pausiert und später ohne Verlust ihres Wiederholungsmusters fortgesetzt werden.
+
+**Anforderungen (aus Implementierung):**
+- Pausieren ist nur für geplante, wiederkehrende Skeets zulässig und setzt ausschließlich den Status auf `paused`.
+- Beim Pausieren MÜSSEN `scheduledAt`, `scheduledPlannedAt` und `repeatAnchorAt` unverändert bleiben.
+- Fortsetzen ist nur für pausierte, wiederkehrende Skeets zulässig und setzt den Status wieder auf `scheduled`.
+- Beim Fortsetzen MUSS der erste reguläre zukünftige Termin berechnet werden; `repeatAnchorAt` bleibt unverändert.
+- Einmalige Skeets DÜRFEN weder pausiert noch fortgesetzt werden.
+
+**Konzept-Abgleich:** erfüllt
+
+---
+
 ## backend/__tests__/scheduler/startupPendingScan.test.js
 
 **Komponente/Bereich:** `markMissedSkeetsPending` – Startup-Scan für überfällige Skeets.
@@ -533,7 +551,7 @@ Neue Tests sollten durch Hinzufügen eines weiteren Abschnitts im selben Format 
 - **TBD**
 
 **Anforderungen (aus Implementierung):**
-- Prüft, dass das Test-All-Skript alle relevanten Workspaces (Root, Dashboard, bsky-client, Shared-UI) referenziert.
+- Prüft, dass das Test-All-Skript alle relevanten Workspaces (Root, Dashboard, Shared-UI) referenziert.
 - Dient als Sicherheitsnetz, damit zukünftige Änderungen an `scripts/test-all.mjs` die CI-Testgruppen nicht versehentlich reduzieren.
 
 **Konzept-Abgleich:** offen

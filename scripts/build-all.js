@@ -13,7 +13,6 @@ const workspaceDir = path.resolve(__dirname, "..");
 
 const steps = [
   { label: "Backend", args: ["run", "build:backend"] },
-  { label: "Bsky-Client", args: ["run", "build:bsky-client"] },
   { label: "Dashboard", args: ["run", "build:frontend"] },
   { label: "Shared UI", args: ["run", "build:shared-ui"] },
   { label: "Media-Pickers", args: ["run", "build", "--workspace", "packages/media-pickers"] },

@@ -762,6 +762,64 @@ async function restoreSkeet(id) {
   return skeet;
 }
 
+async function pauseRecurringSkeet(id) {
+  const skeet = await Skeet.findByPk(id);
+  if (!skeet) {
+    const error = new Error('Skeet nicht gefunden.');
+    error.status = 404;
+    throw error;
+  }
+  if (skeet.repeat === 'none') {
+    const error = new Error('Nur wiederkehrende Skeets können pausiert werden.');
+    error.status = 400;
+    throw error;
+  }
+  if (skeet.status !== 'scheduled') {
+    const error = new Error('Nur geplante wiederkehrende Skeets können pausiert werden.');
+    error.status = 400;
+    throw error;
+  }
+
+  await skeet.update({ status: 'paused', pendingReason: null });
+  emitSkeetEvent('skeet:updated', { id: skeet.id, status: 'paused' });
+  return skeet;
+}
+
+async function resumeRecurringSkeet(id) {
+  const skeet = await Skeet.findByPk(id);
+  if (!skeet) {
+    const error = new Error('Skeet nicht gefunden.');
+    error.status = 404;
+    throw error;
+  }
+  if (skeet.repeat === 'none') {
+    const error = new Error('Nur wiederkehrende Skeets können fortgesetzt werden.');
+    error.status = 400;
+    throw error;
+  }
+  if (skeet.status !== 'paused') {
+    const error = new Error('Nur pausierte Skeets können fortgesetzt werden.');
+    error.status = 400;
+    throw error;
+  }
+
+  const nextAt = schedulerService.getNextScheduledAt(skeet, new Date());
+  if (!nextAt) {
+    const error = new Error('Konnte den nächsten Wiederholungstermin nicht bestimmen.');
+    error.status = 400;
+    throw error;
+  }
+
+  await skeet.update({
+    status: 'scheduled',
+    pendingReason: null,
+    scheduledAt: schedulerService.applyRandomOffset(nextAt) || nextAt,
+    scheduledPlannedAt: nextAt,
+  });
+  emitSkeetEvent('skeet:updated', { id: skeet.id, status: 'scheduled' });
+  return skeet;
+}
+
 async function findPendingManualSkeetOrThrow(id) {
   const skeet = await Skeet.findByPk(id);
   if (!skeet) {
@@ -905,6 +963,8 @@ module.exports = {
   deleteSkeet,
   retractSkeet,
   restoreSkeet,
+  pauseRecurringSkeet,
+  resumeRecurringSkeet,
   normalizeTargetPlatforms,
   ensurePlatforms: ensureTargetPlatforms,
   parseOptionalDate,

@@ -92,6 +92,7 @@ function CronInfo({ open, onClose }) {
 - Für den Status `pending_manual` verwenden wir im UI die Bezeichnung **„Freizugebend“**:
   - Tab-Label: `Freizugeben` (statt „Wartend“/„Pending“).
   - Hinweistexte: Formulierungen wie „Auf Freigabe wartende Posts“ bzw. „Posts, die auf Freigabe warten“.
+- Für den Status `paused` verwenden wir **„Pausiert“**. Dieser Status steht nur für wiederkehrende Posts zur Verfügung; Pausieren und Fortsetzen erfolgen über Symbol-Buttons mit Tooltip und `aria-label`.
 
 ### Produktname
 
@@ -99,8 +100,7 @@ function CronInfo({ open, onClose }) {
   - Verwendet in prominenten Stellen: App-Header, About-Überschrift, ggf. Window-/Titelzeile.
 - Im Fließtext sprechen wir von **„dem Kampagnen‑Tool“**, z. B.:
   - „Dieses Kampagnen‑Tool unterstützt das Planen …“
-- Plattform-spezifische Bereiche behalten ihren Zusatz:
-  - z. B. NAV-Eintrag **„Bluesky Client“** bleibt bestehen und verweist explizit auf den eingebetteten Bluesky-Client.
+- Plattformnamen werden nur dort verwendet, wo sie Zielplattformen oder deren Ergebnisse bezeichnen, etwa in Plattform-Badges und Zugangsdaten.
 
 ### Benennung: Posts-Navigation
 
@@ -113,7 +113,7 @@ function CronInfo({ open, onClose }) {
   - Posts - Übersicht: großer Header **„Posts – Übersicht“**.
   - Planer: großer Header **„Post planen“**.
   - Panels innerhalb der Übersicht:
-    - z. B. **„Post-Aktivität“** als Panel-Titel für den Bereich mit Tabs „Geplant“, „Veröffentlicht“, „Freizugeben“, „Papierkorb“.
+    - z. B. **„Post-Aktivität“** als Panel-Titel für den Bereich mit Tabs „Geplant“, „Pausiert“, „Veröffentlicht“, „Freizugeben“, „Papierkorb“.
 
 ### Datenhaltung: veröffentlichte Posts
 
@@ -304,25 +304,9 @@ function Example() {
   - konsistente Icon-Größe (z. B. `h-4 w-4`) und gleiche Abstände (`px`, `py`).
 - Bestehende Buttons für „Bild hinzufügen“, „GIF hinzufügen“ und „Emoji einfügen“ im Planner sollten an diesen Stil angepasst werden, damit sie optisch zu Info-/Import-/Export-Buttons passen und wie Teil eines einheitlichen Systems wirken.
 
-## Pane-Zuordnung
+## Bereichszuordnung im Dashboard
 
-### NAV-Pane (linke Sidebar)
-- Permanente Navigation und Schnellaktionen (Compose, Theme, Feeds). Wird nicht pro View getauscht.
-
-### Content-Pane (Hauptbereich)
-- `timeline`: Home-Feed/Tabs (TimelineHeader)
-- `search`: Globale Suche (SearchView)
-- `notifications`: Mitteilungen inkl. Tabs
-- `feeds`: Feeds-Seite mit Header + Tabs (Meine Feeds / Entdecke neue Feeds) und Tool-Button fuer den Feed-Manager
-- `settings`, `blocks`, `saved`, etc. – sämtliche Hauptsektionen laufen hier
-- Der Inhalt bleibt im DOM und wird nur bei aktivem Detail-Pane via CSS ausgeblendet.
-
-### Detail-Pane (rechter/unterer Bereich)
-- `thread`: Thread-Lesefenster (zeigt aktuell den kompletten Baum; Unroll-Button steuert den Autoren-View)
-- `profileViewer`: Modalersatz für Profilansichten
-- `hashtagSearch`: Hashtag-Suche inkl. Tabs
-- Weitere darstellungsbezogene Views (z. B. künftige Modals) können hier integriert werden, solange sie dem Pane-Layout folgen.
-
-### Modals (klassisch)
-- Composer, Medien-Dialoge, Bestätigungen – reine Dialoge, keine Pane-Inhalte.
-- Portals nutzen den gemeinsamen Root `#bsky-portal-root` statt pro Komponente eigene `<div>` im `<body>` anzulegen.
+- Die linke Sidebar enthält die Navigation für Übersicht, Posts, Threads, Konfiguration und die Projektinformationen.
+- Der Hauptbereich zeigt jeweils genau eine Dashboard-Ansicht. Posts und Threads verwenden eigene Übersichts- und Planungsansichten.
+- Dialoge sind für klar abgegrenzte Aufgaben vorgesehen, etwa Medienbearbeitung, Bestätigung kritischer Aktionen und Kontextinformationen.
+- Portals nutzen den gemeinsamen Root der Dashboard-Anwendung; Komponenten legen keine eigenen Portal-Container im `body` an.

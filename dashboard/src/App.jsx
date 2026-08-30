@@ -574,6 +574,7 @@ function DashboardApp ({ onLogout, session, onRenew, onRefreshSession }) {
     plannedSkeets,
     publishedSkeets,
     deletedSkeets,
+    pausedSkeets,
     refreshNow: refreshSkeetsNow,
     fetchReactions,
     showSkeetContent,
@@ -624,7 +625,9 @@ function DashboardApp ({ onLogout, session, onRenew, onRefreshSession }) {
     handleDelete: handleDeleteSkeet,
     handleRetract: handleRetractSkeet,
     handlePermanentDelete: handlePermanentDeleteSkeet,
-    handleRestore: handleRestoreSkeet
+    handleRestore: handleRestoreSkeet,
+    handlePause: handlePauseSkeet,
+    handleResume: handleResumeSkeet
   } = useSkeetActions({
     toast,
     refreshSkeetsNow,
@@ -660,7 +663,7 @@ function DashboardApp ({ onLogout, session, onRenew, onRefreshSession }) {
 
   const plannedSkeetsWithoutPending = useMemo(() => {
     return Array.isArray(plannedSkeets)
-      ? plannedSkeets.filter(s => s.status !== 'pending_manual')
+      ? plannedSkeets.filter(s => s.status !== 'pending_manual' && s.status !== 'paused')
       : []
   }, [plannedSkeets])
 
@@ -748,12 +751,12 @@ function DashboardApp ({ onLogout, session, onRenew, onRefreshSession }) {
   useEffect(() => {
     setEditingSkeet(current => {
       if (!current) return current
-      const updated = [...plannedSkeets, ...publishedSkeets].find(
+      const updated = [...plannedSkeets, ...pausedSkeets, ...publishedSkeets].find(
         entry => entry.id === current.id
       )
       return updated ?? null
     })
-  }, [plannedSkeets, publishedSkeets])
+  }, [plannedSkeets, pausedSkeets, publishedSkeets])
 
   useEffect(() => {
     if (activeView !== 'skeets-overview') return
@@ -1378,11 +1381,14 @@ function DashboardApp ({ onLogout, session, onRenew, onRefreshSession }) {
           publishedSkeets={publishedSkeets}
           deletedSkeets={deletedSkeets}
           pendingSkeets={pendingSkeets}
+          pausedSkeets={pausedSkeets}
           onEditSkeet={handleEdit}
           onDeleteSkeet={handleDeleteSkeet}
           onRetractSkeet={handleRetractSkeet}
           onRestoreSkeet={handleRestoreSkeet}
           onPermanentDeleteSkeet={handlePermanentDeleteSkeet}
+          onPauseSkeet={handlePauseSkeet}
+          onResumeSkeet={handleResumeSkeet}
           onFetchReactions={fetchReactions}
           onShowSkeetContent={showSkeetContent}
           onShowRepliesContent={showRepliesContent}

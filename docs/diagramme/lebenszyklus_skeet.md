@@ -6,6 +6,7 @@ Das Zustandsdiagramm zeigt die Status eines einzelnen Skeets und die wichtigsten
 stateDiagram-v2
   state "Entwurf" as draft_state
   state "Geplant" as scheduled_state
+  state "Pausiert" as paused_state
   state "Ausstehend (manuell)" as pending_state
   state "Gesendet" as sent_state
   state "Verworfen" as skipped_state
@@ -14,6 +15,7 @@ stateDiagram-v2
 
   style draft_state fill:#9e9e9e,color:#fff
   style scheduled_state fill:#1976d2,color:#fff
+  style paused_state fill:#757575,color:#fff
   style pending_state fill:#ff9800,color:#000
   style sent_state fill:#4caf50,color:#fff
   style skipped_state fill:#000000,color:#fff
@@ -31,6 +33,7 @@ stateDiagram-v2
   scheduled_state --> scheduled_state: Scheduler sendet (wiederkehrend, nächster Termin)
   scheduled_state --> error_state: Versand fehlgeschlagen
   scheduled_state --> pending_state: Scheduler-Start mit verpasstem Termin
+  scheduled_state --> paused_state: Wiederholung pausieren
   scheduled_state --> trash_state: Löschen/Verwerfen
 
   pending_state --> sent_state: Publish Once (einmaliger Skeet)
@@ -38,6 +41,9 @@ stateDiagram-v2
   pending_state --> skipped_state: Discard (einmaliger Skeet)
   pending_state --> scheduled_state: Discard (wiederkehrend, nächster Termin)
   pending_state --> trash_state: Löschen
+
+  paused_state --> scheduled_state: Fortsetzen (nächster regulärer Termin)
+  paused_state --> trash_state: Löschen
 
   error_state --> scheduled_state: Fehler behoben / neu planen
   error_state --> trash_state: Löschen
@@ -51,4 +57,4 @@ stateDiagram-v2
   trash_state --> [*]: Permanent löschen
 ```
 
-> Wiederkehrende Skeets (`repeat != 'none'`) verbleiben nach einem regulären Versand im Status *Geplant* (*scheduled*); der Scheduler berechnet beim Versand automatisch den nächsten Termin. Verpasste Wiederholungen landen beim Scheduler-Start in *pending_manual* (*Ausstehend (manuell)*) und können von dort aus einmalig gesendet oder verworfen werden.
+> Wiederkehrende Skeets (`repeat != 'none'`) verbleiben nach einem regulären Versand im Status *Geplant* (*scheduled*); der Scheduler berechnet beim Versand automatisch den nächsten Termin. Sie können in den Status *Pausiert* (*paused*) wechseln und werden dort vom Scheduler ignoriert. Beim Fortsetzen wird der nächste reguläre zukünftige Termin berechnet. Verpasste Wiederholungen landen beim Scheduler-Start in *pending_manual* (*Ausstehend (manuell)*) und können von dort aus einmalig gesendet oder verworfen werden.

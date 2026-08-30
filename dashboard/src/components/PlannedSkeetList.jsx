@@ -3,12 +3,15 @@ import PlatformBadges from "./PlatformBadges";
 import ContentWithLinkPreview from "./ContentWithLinkPreview";
 import SkeetHistoryPanel from "./skeets/SkeetHistoryPanel.jsx";
 import { useTranslation } from "../i18n/I18nProvider.jsx";
+import { PauseIcon, Pencil2Icon, PlayIcon, TrashIcon } from "@radix-ui/react-icons";
 
 function PlannedSkeetList({
   skeets,
   onEdit,
   onDelete,
   getRepeatDescription,
+  onPause,
+  onResume,
   highlightedId = null,
   showPendingActions = false,
   onPublishPendingOnce,
@@ -37,6 +40,7 @@ function PlannedSkeetList({
         const isHighlighted = highlightedId === skeet.id
         const showHistoryPanel = typeof skeet.repeat === "string" && skeet.repeat !== "none"
         const isPendingManual = skeet.status === "pending_manual"
+        const isPaused = skeet.status === "paused"
         const showDefaultActions = !showPendingActions || !isPendingManual
         return (
           <Card
@@ -70,12 +74,39 @@ function PlannedSkeetList({
               </div>
               <div className="skeet-meta-column">
                 {showDefaultActions ? (
-                  <div className="flex w-full flex-col items-stretch gap-2 sm:flex-row sm:flex-nowrap sm:items-center sm:justify-end sm:gap-3">
-                    <Button variant="secondary" onClick={() => onDelete(skeet)}>
-                      {t('posts.lists.planned.remove', 'Löschen')}
+                  <div className="flex w-full items-center justify-end gap-2">
+                    {showHistoryPanel ? (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label={isPaused
+                          ? t('posts.lists.planned.resume', 'Fortsetzen')
+                          : t('posts.lists.planned.pause', 'Pausieren')}
+                        title={isPaused
+                          ? t('posts.lists.planned.resume', 'Fortsetzen')
+                          : t('posts.lists.planned.pause', 'Pausieren')}
+                        onClick={() => isPaused ? onResume?.(skeet) : onPause?.(skeet)}
+                      >
+                        {isPaused ? <PlayIcon /> : <PauseIcon />}
+                      </Button>
+                    ) : null}
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      aria-label={t('posts.lists.planned.remove', 'Löschen')}
+                      title={t('posts.lists.planned.remove', 'Löschen')}
+                      onClick={() => onDelete(skeet)}
+                    >
+                      <TrashIcon />
                     </Button>
-                    <Button variant="primary" onClick={() => onEdit(skeet)}>
-                      {t('posts.lists.planned.edit', 'Bearbeiten')}
+                    <Button
+                      variant="primary"
+                      size="icon"
+                      aria-label={t('posts.lists.planned.edit', 'Bearbeiten')}
+                      title={t('posts.lists.planned.edit', 'Bearbeiten')}
+                      onClick={() => onEdit(skeet)}
+                    >
+                      <Pencil2Icon />
                     </Button>
                   </div>
                 ) : null}

@@ -202,7 +202,7 @@ export function useSkeets (options = {}) {
   const hasDueSoon = (() => {
     const now = Date.now()
     for (const s of skeets) {
-      if (s.deletedAt) continue
+      if (s.deletedAt || s.status === 'paused') continue
       const isRecurring = typeof s.repeat === 'string' && s.repeat !== 'none'
       // sowohl einmalige als auch wiederkehrende Einträge berücksichtigen
       const dueAt = s.scheduledAt ? new Date(s.scheduledAt).getTime() : null
@@ -468,12 +468,14 @@ export function useSkeets (options = {}) {
     skeets,
     plannedSkeets: skeets.filter(s => {
       if (s.deletedAt) return false
+      if (s.status === 'paused') return false
       const isRecurring = typeof s.repeat === 'string' && s.repeat !== 'none'
       if (isRecurring) return true
       return !s.postUri
     }),
     publishedSkeets: skeets.filter(s => {
       if (s.deletedAt) return false
+      if (s.status === 'paused') return false
       const isRecurring = typeof s.repeat === 'string' && s.repeat !== 'none'
       if (isRecurring) {
         return Boolean(s.postUri)
@@ -481,6 +483,7 @@ export function useSkeets (options = {}) {
       return Boolean(s.postUri)
     }),
     deletedSkeets: skeets.filter(s => Boolean(s.deletedAt)),
+    pausedSkeets: skeets.filter(s => !s.deletedAt && s.status === 'paused'),
     loadSkeets,
     refreshNow,
     fetchReactions,

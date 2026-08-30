@@ -12,7 +12,6 @@ const LINT_TASKS = [
   { name: 'root', args: ['npm', ['run', 'lint']] },
   { name: 'backend', args: ['npm', ['run', 'lint', '--workspace', 'backend']] },
   { name: 'dashboard', args: ['npm', ['run', 'lint', '--workspace', 'dashboard']] },
-  { name: 'bsky-client', args: ['npm', ['run', 'lint', '--workspace', 'bsky-client']] },
   { name: 'packages/media-pickers', args: ['npm', ['run', 'lint', '--workspace', 'packages/media-pickers']] },
   { name: 'packages/shared-ui', args: ['npm', ['run', 'lint', '--workspace', 'packages/shared-ui']] }
 ]

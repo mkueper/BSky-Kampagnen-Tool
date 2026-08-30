@@ -10,7 +10,6 @@ export default defineConfig({
     include: [
       'backend/src/**/*.test.{js,ts,jsx,tsx}',
       'backend/__tests__/**/*.test.{js,ts,jsx,tsx}',
-      'bsky-client/**/*.test.{js,ts,jsx,tsx}',
       'dashboard/src/**/*.test.{js,ts,jsx,tsx}',
       'dashboard/__tests__/**/*.test.{js,ts,jsx,tsx}',
       'packages/shared-logic/**/__tests__/**/*.test.{js,ts,jsx,tsx}'
@@ -19,7 +18,7 @@ export default defineConfig({
     watchExclude: ['dashboard/dist/**', 'dist/**', 'node_modules/**'],
     // Standard: Backend-Tests laufen in der Node-Umgebung.
     environment: 'jsdom',
-    // Frontend-Tests (bsky-client, dashboard) nutzen jsdom mit window, document etc.
+    // Dashboard-Tests nutzen jsdom mit window, document etc.
     environmentMatchGlobs: [
       ['backend/src/**', 'node'],
       ['backend/__tests__/**', 'node']

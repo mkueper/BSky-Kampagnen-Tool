@@ -6,6 +6,7 @@ Die Tabelle definiert die Farbzuordnung für Status in UI-Komponenten und Diagra
 |----------------|-----------------------|------------|
 | `draft`        | `#9e9e9e`             | Entwürfe ohne Termin/Veröffentlichung |
 | `scheduled`    | `#1976d2`             | Geplante Skeets/Threads |
+| `paused`       | `#757575`             | Pausierte wiederkehrende Posts |
 | `publishing`   | `#ff9800`             | Thread wird gerade versendet |
 | `published`    | `#4caf50`             | Erfolgreich veröffentlichte Inhalte |
 | `failed`       | `#f44336`             | Fehler beim Versand oder Engagement-Retrieval |

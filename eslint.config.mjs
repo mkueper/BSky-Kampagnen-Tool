@@ -13,7 +13,6 @@ export default tseslint.config(
       "dist/",
       "dashboard/dist/",
       "dashboard/node_modules/",
-      "bsky-client/dist/",
       "z-tests/"
     ],
   },
@@ -86,8 +85,7 @@ export default tseslint.config(
   // 6. Frontend/Dashboard specific config (React)
   {
     files: [
-      "dashboard/src/**/*.{js,jsx}",
-      "bsky-client/src/**/*.{js,jsx}"
+      "dashboard/src/**/*.{js,jsx}"
     ],
     languageOptions: {
       globals: {

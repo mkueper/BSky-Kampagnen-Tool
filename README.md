@@ -9,7 +9,7 @@ Kurzüberblick: [docs/KurzErklaert.md](docs/KurzErklaert.md)
 > Hinweis: Dieses Projekt unterstützt verantwortungsvolle, faktenbasierte Kampagnenkommunikation.  
 > Die ethischen Leitlinien findest du in [ETHICS.en.md](ETHICS.en.md) und [ETHICS.de.md](ETHICS.de.md).
 
-Der **Bluesky Kampagnen-Tool** hilft dabei, Skeets vorzuplanen, automatisiert zu veröffentlichen und Reaktionen komfortabel im Dashboard zu verfolgen. Das Projekt setzt auf eine Node.js/Express-API mit SQLite (Standard), ein React-Dashboard und einen Scheduler, der geplante Beiträge zuverlässig ausliefert. Andere SQL-Dialekte lassen sich prinzipiell über `DATABASE_URL` einbinden, gelten aber noch als experimentell, weil die Baseline-Migration aktuell SQLite-Pragmas verwendet.
+Das **Bluesky-Kampagnen-Tool** hilft dabei, Posts und Threads vorzuplanen, automatisiert auf Bluesky und optional Mastodon zu veröffentlichen und Reaktionen im Dashboard zu verfolgen. Das Projekt setzt auf eine Node.js/Express-API mit SQLite (Standard), ein React-Dashboard und einen Scheduler, der geplante Beiträge zuverlässig ausliefert. Andere SQL-Dialekte lassen sich prinzipiell über `DATABASE_URL` einbinden, gelten aber noch als experimentell, weil die Baseline-Migration aktuell SQLite-Pragmas verwendet.
 
 > Hinweis (Sicherheit & Reifegrad)
 >
@@ -28,8 +28,6 @@ Der **Bluesky Kampagnen-Tool** hilft dabei, Skeets vorzuplanen, automatisiert zu
 - **Plattformauswahl & Crossposting** – Zielplattformen pro Skeet festhalten; sobald Mastodon konfiguriert ist, wählen Skeet- und Thread-Formulare Bluesky + Mastodon automatisch vor.
 - **Frontend-Tabs & UX** – Geplante/veröffentlichte Skeets, Reply-Ansicht, Export/Import geplanter Beiträge.
 - **Theme-Wechsel** – Umschalten zwischen mehreren Themes (z. B. Light, Dim, Dark, Midnight) direkt im Dashboard; Auswahl wird persistent gespeichert und systemweite Dark‑Mode‑Einstellungen können berücksichtigt werden.
-- **Direkter Bluesky-Client** – Integrierte Timeline mit Composer (Discover/Following u. a.) sowie rudimentäre Reply-Funktion.
-- **Blockliste & Profil-Hinweise** – Über den NAV-Punkt „Blockliste“ siehst du alle Accounts, die du blockierst; Profile zeigen sofort, ob du blockierst bzw. blockiert wirst.
 - **Admin-Login & API-Schutz** – Dashboard-Login basiert auf `AUTH_*`‑Variablen, setzt httpOnly‑Session‑Cookies und schützt sämtliche `/api/*`‑Routen (außer `/api/auth/*`) über eine Middleware `requireAuth`.
 
 > Die Roadmap in `docs/ROADMAP.md` zeigt, welche Erweiterungen (zusätzliche Plattformen, erweiterte Analysen) geplant sind.
@@ -38,11 +36,12 @@ Der **Bluesky Kampagnen-Tool** hilft dabei, Skeets vorzuplanen, automatisiert zu
 
 Die Pending-Skeet-Logik stellt sicher, dass während eines Scheduler-Ausfalls keine alten Posts schlagartig nachgeholt werden. Stattdessen wechseln überfällige Einträge in den Status `pending_manual`, bis ein Mensch entscheidet, wie es weitergeht.
 
-- **Statusbedeutung**: `scheduled` (= regulär geplant), `pending_manual` (= verpasst, wartet auf Freigabe), `sent` (= erfolgreich veröffentlicht) und `skipped` (= bewusst verworfen). Optional kommen `draft` und `error` hinzu, werden hier aber nicht automatisch gesetzt.
+- **Statusbedeutung**: `scheduled` (= regulär geplant), `paused` (= Wiederholung ausgesetzt), `pending_manual` (= verpasst, wartet auf Freigabe), `sent` (= erfolgreich veröffentlicht) und `skipped` (= bewusst verworfen). Optional kommen `draft` und `error` hinzu, werden hier aber nicht automatisch gesetzt.
+- **Pausieren wiederkehrender Posts**: Ein pausierter Post bleibt im Dashboard sichtbar, wird vom Scheduler ignoriert und beim Fortsetzen auf den nächsten regulären zukünftigen Termin gesetzt.
 - **Warum kein Auto-Nachholen?** Überfällige Skeets könnten bei plötzlich wieder funktionierendem Scheduler zu Spam-Spitzen führen oder veraltete Inhalte posten. Daher werden sie eingefroren und verlangen eine bewusste Entscheidung.
 - **Wiederkehrende Skeets**: Auch Repeater landen beim Start im Pending-Status. Erst nach manueller Entscheidung laufen sie weiter, damit keine Kaskade alter Wiederholungen ausgelöst wird.
 - **Manuelle Optionen**: „Publish Once“ postet den Eintrag sofort (bei Repeatern inklusive Neuplanung des nächsten Termins); „Discard“ entfernt den fälligen Slot (`repeat = 'none'` endgültig, Repeater springen direkt zum nächsten regulären Termin).
-- **Testabdeckung**: Die Dateien in `backend/tests/backend/…` prüfen Statusübergänge, Terminberechnungen und API-Verhalten, sodass Downtime-Szenarien reproduzierbar und spam-sicher bleiben.
+- **Testabdeckung**: Die Dateien in `backend/__tests__/…` prüfen Statusübergänge, Terminberechnungen und API-Verhalten, sodass Downtime-Szenarien reproduzierbar und spam-sicher bleiben.
 
 ---
 
@@ -77,16 +76,6 @@ npm run start:dev
 - Link-Preview: Im Docker-Setup wird `/preview` über Nginx an das Backend durchgereicht (kein externer Backend-Port nötig).
 
 > Für den Produktionsmodus kannst du `npm run build:all` (baut das Dashboard; Backend benötigt keinen Build) und anschließend `npm start` verwenden. Details siehe `docs/installation/local-install.md`.
-
----
-
-## ThreadWriter Desktop (Tauri)
-
-Der ThreadWriter wurde in ein eigenes Repository ausgelagert:
-
-<https://github.com/mkueper/ThreadWriter>
-
-Dort findest du die Tauri-Variante inklusive Installationshinweisen und Build-Skripten.
 
 ---
 
@@ -219,35 +208,6 @@ Ohne konfigurierte Werte (`AUTH_*`) verweigert das Backend sämtliche geschützt
 - UI‑Overrides (Dashboard) werden dauerhaft in der Datenbank gespeichert und vom Backend in `/api/client-config` gegenüber Env/VITE bevorzugt ausgeliefert.
 - Portauflösung (Server): `APP_PORT` → `BACKEND_INTERNAL_PORT` → `INTERNAL_BACKEND_PORT` → `BACKEND_PORT` → `3000`.
 
-### Link-Vorschau im Bluesky-Client
-
-- Damit der Bluesky-Client OG/Twitter-Metatags laden kann, setze `VITE_PREVIEW_PROXY_URL` auf einen erreichbaren Proxy – beispielsweise `http://localhost:3000/api/preview`, wenn das Backend parallel läuft.
-- Für reine Client-Entwicklung ohne Backend kannst du `npm run dev:preview-proxy` starten. Das Skript lauscht standardmäßig auf `http://127.0.0.1:3456/preview`; setze anschließend `VITE_PREVIEW_PROXY_URL=http://127.0.0.1:3456/preview`.
-- Port/Host lassen sich via `PREVIEW_PROXY_PORT` bzw. `PREVIEW_PROXY_HOST` überschreiben.
-- Für dedizierte Umgebungen (z. B. privates Netz) steht unter `docker/link-preview-proxy.Dockerfile` ein minimales Image bereit:
-  ```bash
-  docker build -f docker/link-preview-proxy.Dockerfile -t bsky-preview-proxy .
-  docker run --rm -p 3456:3456 \
-    -e PREVIEW_PROXY_HOST=0.0.0.0 \
-    -e PREVIEW_PROXY_PORT=3456 \
-    bsky-preview-proxy
-  ```
-  Danach verweist `VITE_PREVIEW_PROXY_URL` auf `http://<dein-host>:3456/preview`. Compose-Beispiel:
-  ```yaml
-  services:
-    preview-proxy:
-      build:
-        context: .
-        dockerfile: docker/link-preview-proxy.Dockerfile
-      environment:
-        PREVIEW_PROXY_HOST: 0.0.0.0
-        PREVIEW_PROXY_PORT: 3456
-      ports:
-        - "3456:3456"
-  ```
-- Alternativ kann zur Laufzeit `window.__BSKY_PREVIEW_ENDPOINT__` (String) oder `window.__BSKY_PREVIEW_FETCH__` (Promise-basierte Fetch-Funktion) gesetzt werden, z. B. aus dem Electron-Preload heraus.
-- Ist kein Proxy konfiguriert, zeigt der Client wie bisher den Hinweis, dass Link-Vorschauen im Standalone-Modus nicht verfügbar sind.
-
 Sicherheitshinweis: `.env` nicht committen und lokal restriktive Rechte setzen (z. B. `chmod 600 .env`).
 
 ---
@@ -256,17 +216,17 @@ Sicherheitshinweis: `.env` nicht committen und lokal restriktive Rechte setzen (
 
 Diese Endpunkte sind vor allem für die UI und Admin‑Tasks relevant (und setzen eine gültige Session voraus, da sie hinter `requireAuth` liegen):
 
-- `GET /api/client-config` – Read‑only Client‑Konfiguration (Polling‑Intervalle etc.).
+- `GET /api/client-config` – Read-only Dashboard-Konfiguration (Polling-Intervalle etc.).
 - `GET /api/settings/scheduler` – Scheduler‑Einstellungen (Cron/Zeitzone/Retries).
 - `PUT /api/settings/scheduler` – Scheduler‑Einstellungen speichern.
-- `GET /api/settings/client-polling` – Client-Polling-Einstellungen (DB‑Overrides).
-- `PUT /api/settings/client-polling` – Client-Polling-Einstellungen speichern.
+- `GET /api/settings/client-polling` – Dashboard-Polling-Einstellungen (DB-Overrides).
+- `PUT /api/settings/client-polling` – Dashboard-Polling-Einstellungen speichern.
 - `POST /api/skeets/:id/publish-now` / `POST /api/threads/:id/publish-now` – Sofortversand ohne Scheduler.
+- `POST /api/skeets/:id/pause` / `POST /api/skeets/:id/resume` – Wiederkehrenden Post pausieren bzw. fortsetzen.
 - `POST /api/threads/:id/engagement/refresh` – Engagement (Likes/Reposts/Replies) für einen Thread neu sammeln.
 - `POST /api/engagement/refresh-many` – Batch-Refresh für sichtbar gelistete Skeets.
 - `GET /api/reactions/:skeetId` – Reaktionen für einen veröffentlichten Skeet laden (on‑demand).
 - `GET /api/events` – Server-Sent Events für Live-Updates (skeet:/thread:-Events).
-- `GET /api/bsky/timeline` – Datenquelle für den integrierten Bluesky-Client.
 - `POST /api/tenor/download` – Lädt ein ausgewähltes Tenor-GIF serverseitig herunter und legt es als Temp-Medien-Datei ab.
 
 Die UI nutzt diese Routen bereits; sie können auch für Integrationen/Tests verwendet werden.
@@ -277,9 +237,8 @@ Die UI nutzt diese Routen bereits; sie können auch für Integrationen/Tests ver
 
 - **Manuelle Checks:** `npm run start:dev` (Backend) + neues Build des Dashboards (`npm run build:frontend`).
 - **Linting/Formatting:** Das Projekt enthält Linting-Regeln. Mit `npm run lint` kannst du den Code prüfen und mit `npm run lint:fix` automatisch korrigieren lassen.
-- **Client-Tests:** `npm run test --workspace bsky-client` führt die Vitest-Suite (React Testing Library) für den integrierten Bluesky-Client aus; für den Watch-Modus steht `npm run test:watch --workspace bsky-client` zur Verfügung.
 - **Dashboard-Tests:** `npm run test --workspace dashboard` deckt die UI-spezifische Vitest-Suite (Hooks + Komponenten) ab, u. a. Virtualisierung der Skeet-/Thread-Listen sowie die neuen Lazy-Boundaries.
-- **Backend-Tests:** laufen gegen eine In-Memory-SQLite-DB und werden über Vitest mit Root-Konfiguration gestartet; sie liegen unter `backend/tests/**` und prüfen u. a. Scheduler, Pending-Logik, API-Controller und DB-Utilities.
+- **Backend-Tests:** laufen gegen eine In-Memory-SQLite-DB und werden über Vitest mit Root-Konfiguration gestartet; sie liegen unter `backend/__tests__/**` und prüfen u. a. Scheduler, Pending-Logik, API-Controller und DB-Utilities.
 - **Vor Abgabe:** bitte immer `npm test` **und** `npm run lint` ausführen, damit Backend/Frontend-Tests und Linting gemeinsam grün sind.
 - **VS Code Workspace & Debugging:** Hinweise und Best Practices: `docs/development/vscode-workspace.md`.
  - **CI (GitHub Actions):** Workflow `CI` prüft TypeScript (`npm run typecheck`), baut das Dashboard (`npm run build:frontend`), führt Linting aus und startet Tests mit Vitest auf Node 20 und 22.

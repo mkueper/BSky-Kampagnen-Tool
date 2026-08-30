@@ -53,6 +53,7 @@ Minimaler Import (Array ist ebenfalls erlaubt):
 - `targetPlatforms` (string[]): z. B. `["bluesky","mastodon"]`.
 - `threadId` (number | null): optionaler Verweis auf Thread (selten nötig).
 - `isThreadPost` (boolean | null): optional, wenn Skeet Teil eines Threads ist.
+- `status` (string): optionaler Status. Beim Import werden `draft` und `scheduled` verwendet; `paused` ist nur für bereits angelegte, wiederkehrende Posts relevant und wird über die Pausieren-/Fortsetzen-Aktion gesetzt.
 - `media` (array | undefined): bis zu 4 Medienobjekte.
 
 ## Medienobjekt
@@ -66,3 +67,4 @@ Minimaler Import (Array ist ebenfalls erlaubt):
 
 - Duplikate (Inhalt + Termin/Repeat-Felder) werden beim Import übersprungen.
 - Wenn `scheduledAt` fehlt und `scheduledPlannedAt` gesetzt ist, wird `scheduledPlannedAt` genutzt.
+- Ein pausierter wiederkehrender Post wird beim Fortsetzen auf den nächsten regulären zukünftigen Termin gesetzt; der ursprüngliche Wiederholungsanker bleibt erhalten.

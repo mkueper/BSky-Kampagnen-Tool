@@ -1,6 +1,6 @@
 # @bsky-kampagnen-bot/shared-ui
 
-Shared-UI-Library für alle Frontends des Kampagnen-Bots (`dashboard`, Bluesky-Client, Mastodon-Client, zukünftige UIs).
+Shared-UI-Library für das Dashboard und künftige Oberflächen des Kampagnen-Bots.
 
 ## Scope
 
@@ -15,7 +15,7 @@ Shared-UI-Library für alle Frontends des Kampagnen-Bots (`dashboard`, Bluesky-C
 
 - Shared-UI ist **plattformagnostisch** und wird so gestaltet, dass die Komponenten sich an das umgebende Designsystem anpassen können (z.B. über Klassen, Variants, Theme-Tokens).
 
-Container-Komponenten in `dashboard`, Bluesky-Client oder Mastodon-Client verbinden diese UI-Bausteine mit der jeweiligen Fachlogik.
+Container-Komponenten im `dashboard` verbinden diese UI-Bausteine mit der jeweiligen Fachlogik.
 
 ## Nutzung
 

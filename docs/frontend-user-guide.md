@@ -1,6 +1,6 @@
 # BSky Kampagnen-Tool – Benutzerhandbuch für das Dashboard
 
-Dieses Handbuch richtet sich an Redakteur:innen und Kampagnen-Manager:innen. Es erklärt, wie Posts (Skeets) und Threads geplant, veröffentlicht, Engagement beobachtet und der integrierte Bluesky-Client genutzt wird.
+Dieses Handbuch richtet sich an Redakteur:innen und Kampagnen-Manager:innen. Es erklärt, wie Posts (Skeets) und Threads geplant, veröffentlicht und ausgewertet werden.
 
 > Sprachstil: In der UI und in diesem Handbuch werden neutrale Formulierungen verwendet. Direkte Anreden („du“, „Sie“) werden vermieden und durch beschreibende Texte ersetzt.
 
@@ -24,12 +24,11 @@ Dieses Handbuch richtet sich an Redakteur:innen und Kampagnen-Manager:innen. Es 
 
 - **Übersicht** – Kennzahlen (geplante/veröffentlichte Posts & Threads, Reaktionssummen) sowie „Nächster Post/Thread“ und kommende Veröffentlichungen.
 - **Posts**
-  - *Aktivität*: Geplante, veröffentlichte, freizugebende und gelöschte Posts inkl. Reaktionskarten und Plattform-Badges.
+  - *Aktivität*: Geplante, pausierte, veröffentlichte, freizugebende und gelöschte Posts inkl. Reaktionskarten und Plattform-Badges.
   - *Post planen*: Formular zum Erstellen/Bearbeiten einzelner Posts.
 - **Threads**
   - *Aktivität*: Mehrteilige Kampagnen nach Status (Entwurf, geplant, Veröffentlichungsfortschritt).
   - *Thread planen*: Editor für mehrsegmentige Kampagnen mit Medienunterstützung.
-- **Bluesky Client** – Direktzugriff auf Discover/Following/Mutuals-Feeds inkl. Composer für Sofort-Posts (nutzt dieselben Credentials wie der Scheduler).
 - **Konfiguration**
   - Tabs für *Scheduler & Retries*, *Dashboard-Polling* und *Zugangsdaten*.
 - **Über Kampagnen‑Tool** – Überblick über Zweck, Mitwirkende, Open-Source/Lizenzhinweise sowie Links zur Dokumentation.
@@ -52,7 +51,8 @@ Alle Ansichten reagieren primär auf Server-Sent Events (SSE). Das Dashboard akt
 ### 3.2 Bearbeiten, Status & Schnellaktionen
 - Über das Stift-Icon lässt sich ein Post anpassen. Bereits veröffentlichte Posts können aus dem Dashboard heraus erneut geplant oder auf Plattformen zurückgezogen werden.
 - Der Button **Jetzt veröffentlichen** umgeht den Scheduler und sendet sofort (praktisch für Last-Minute-Posts).
-- Plattform-Badges zeigen den jeweiligen Plattformstatus (`pending`, `sent`, `failed`, `deleted`, `partial`) und liefern Tooltips mit Fehlermeldungen oder URIs; der globale Skeet-Status folgt dem Modell `draft`, `scheduled`, `pending_manual`, `sent`, `skipped`, `error` (siehe Lebenszyklus-Diagramm).
+- Wiederkehrende Posts lassen sich in der Registerkarte *Geplant* pausieren. Sie bleiben unter *Pausiert* sichtbar und werden beim Fortsetzen zum nächsten regulären zukünftigen Termin eingeplant.
+- Plattform-Badges zeigen den jeweiligen Plattformstatus (`pending`, `sent`, `failed`, `deleted`, `partial`) und liefern Tooltips mit Fehlermeldungen oder URIs; der globale Skeet-Status folgt dem Modell `draft`, `scheduled`, `paused`, `pending_manual`, `sent`, `skipped`, `error` (siehe Lebenszyklus-Diagramm).
 
 ### 3.3 Engagement & Replies
 - In der Registerkarte *Veröffentlicht* lässt sich die Sortierung (neu/alt) umschalten.
@@ -120,7 +120,7 @@ Der Tab **Konfiguration** enthält drei Bereiche:
 
 ---
 
-## 7. Live-Updates & Client-Konfiguration
+## 7. Live-Updates & Dashboard-Konfiguration
 
 - Beim Laden holt das Dashboard `/api/client-config`. Die Werte werden aus UI-Overrides (höchste Priorität), Env-Variablen und Defaults zusammengeführt.
 - Vorrangfolge: **UI** → **Servervariablen (`THREAD_POLL_*`, `SKEET_POLL_*`)** → **`VITE_*`** → **Backend-Defaults**.
@@ -130,29 +130,16 @@ Der Tab **Konfiguration** enthält drei Bereiche:
 - SSE vs. Polling:
   - Solange die SSE-Verbindung steht, stammen Live-Updates primär aus dem SSE-Stream (`/api/events`); Polling-Intervalle werden für reguläre Ansichten automatisch ausgesetzt.
   - Während kritischer Phasen (z. B. `publishing`) kann kurzzeitig zusätzlich Polling aktiv sein, um den finalen Status früh zu erkennen.
-  - Bei Netzwerkproblemen oder getrenntem SSE-Stream springt der Client auf Polling zurück, bis die Verbindung wiederhergestellt ist.
+  - Bei Netzwerkproblemen oder getrenntem SSE-Stream springt das Dashboard auf Polling zurück, bis die Verbindung wiederhergestellt ist.
 
 ---
 
-## 8. Bluesky Direkt-Client
-
-- **Timeline-Tabs:** Discover, Following, Popular with Friends, Mutuals, Best of Follows. Ein erneuter Klick auf einen aktiven Tab lädt den Feed neu.
-- **Composer:** Modal-Fenster zum sofortigen Posten (inkl. Reply-Funktion). Medien-Uploads und ALT-Texte funktionieren analog zum Kampagnen-Planer. Ab mehr als 300 Zeichen erscheint der Button „In Thread umwandeln“, um den Entwurf direkt in den Thread-Composer zu uebernehmen.
-- **Aktionen:** Like/Unlike, Repost/Unrepost direkt aus der Timeline.
-- **Einschränkungen:** Einige Sektionen (Suche, Benachrichtigungen, Chat, Feeds, Listen) sind derzeit Platzhalter – das Layout ist vorbereitet, Funktionalität folgt später.
-- **Übersetzungen:** Der Translate-Button öffnet (noch) einen lokalen oder privaten Übersetzungsdienst wie LibreTranslate. Die Übersetzungsfunktion ist in der aktuellen Phase ausschließlich für lokale oder private Übersetzungsdienste vorgesehen. Öffentliche Endpunkte sind bewusst ausgeschlossen.
-
-Der Direkt-Client verwendet dieselbe Login-Session wie der Scheduler. Ein fehlgeschlagener Bluesky-Login wirkt sich daher sowohl auf den Planer als auch auf den Direkt-Client aus.
-
----
-
-## 9. Fehlersuche
+## 8. Fehlersuche
 
 | Problem | Mögliche Ursachen & Lösungen |
 |---------|------------------------------|
 | Skeet/Thread wird nicht veröffentlicht | Credentials prüfen (Konfiguration → Zugangsdaten). In den Server-Logs nach Fehlermeldungen suchen (`npm run start:dev`). |
 | Medien-Upload schlägt fehl | Dateigröße größer als `UPLOAD_MAX_BYTES` oder `JSON_BODY_LIMIT_MB`. Ggf. Wert in `.env` erhöhen oder Bilder stärker komprimieren. |
-| Bluesky-Client lädt keine Timeline | Prüfe Bluesky-Login im Backend-Log. Bei Rate-Limits kurz warten; ein erneuter Tab-Klick löst einen Refresh aus. |
 | Dashboard zeigt keine Live-Updates | SSE-Verbindung getrennt (Konsole prüfen). Fallback-Polling ggf. über **Konfiguration → Dashboard-Polling** verkürzen. |
 | Export-Datei wird nicht gespeichert | Browser unterstützt kein `showSaveFilePicker`. Datei wird dennoch in den Standard-Download-Ordner geschrieben. |
 
@@ -160,7 +147,7 @@ Bei weiteren Problemen helfen Browser-Konsole (Frontend) und die Logs des Node-S
 
 ---
 
-## 10. Weiterführende Hinweise
+## 9. Weiterführende Hinweise
 
 - Import-/Export-Format: `backend/src/core/services/importExportService.js`
 - Datenbankstruktur & Migrationen: `docs/database.md`
@@ -171,7 +158,7 @@ Viel Erfolg mit geplanten Kampagnen!
 
 ---
 
-## 11. Screenshots
+## 10. Screenshots
 
 Für eine visuelle Orientierung findest du eine aktuelle Sammlung im Ordner `docs/Screenshots/`. Wichtige Ansichten:
 

@@ -24,10 +24,8 @@ The project is built on a Node.js/Express backend with SQLite as the primary dat
 * **Engagement Collector** – Periodically retrieves likes, reposts, and replies for published threads (Bluesky, optionally Mastodon). On-demand refresh supported.
 * **Reactions & Replies** – View likes, reposts, and replies directly within each skeet card.
 * **Platform Selection & Crossposting** – Configure target platforms per skeet; Bluesky and Mastodon are preselected once Mastodon is enabled.
-* **Frontend Tabs & UX Enhancements** – Manage scheduled and published posts, explore replies, export/import scheduled content.
+* **Frontend Tabs & UX Enhancements** – Manage scheduled, paused, and published posts; explore replies and export/import scheduled content.
 * **Theme Switching** – Multiple dashboard themes (Light, Dim, Dark, Midnight) with persistent storage and automatic dark-mode support.
-* **Integrated Bluesky Client** – Timeline view (Discover/Following) with composer and basic reply functionality.
-* **Blocklist & Profile Indicators** – View blocked accounts; profiles show whether accounts block or are blocked.
 * **Admin Login & API Protection** – All core features require authenticated sessions via secure httpOnly cookies.
 
 The roadmap in `docs/ROADMAP.md` outlines future functionality (additional platforms, extended analytics, and more).
@@ -38,11 +36,12 @@ The roadmap in `docs/ROADMAP.md` outlines future functionality (additional platf
 
 To avoid accidental bulk posting after outages or scheduler interruptions, overdue items are moved into a `pending_manual` state instead of being automatically sent.
 
-* **Statuses**: `scheduled` (planned), `pending_manual` (missed, requires decision), `sent` (published), `skipped` (discarded). Optional: `draft`, `error`.
+* **Statuses**: `scheduled` (planned), `paused` (recurrence suspended), `pending_manual` (missed, requires decision), `sent` (published), `skipped` (discarded). Optional: `draft`, `error`.
+* **Pause recurring posts**: Paused recurring posts remain visible in the dashboard, are ignored by the scheduler, and resume at the next regular future occurrence.
 * **Why not auto-catch-up?** Large batches of outdated posts may be irrelevant or harmful. Manual review ensures editorial control.
 * **Repeating Skeets**: Repeating entries also start in a pending state after downtime to avoid cascades of outdated repetitions.
 * **Manual Options**: *Publish Once* sends the post immediately; *Discard* removes the overdue slot.
-* **Test Coverage**: Automated tests verify all transitions and calculations in `backend/tests/backend/...`.
+* **Test Coverage**: Automated tests verify all transitions and calculations in `backend/__tests__/...`.
 
 ---
 
@@ -76,14 +75,6 @@ npm run start:dev
 * Dashboard served via Express (`dashboard/dist`). Login is required if `AUTH_*` variables are set.
 
 For production builds, use `npm run build:all` followed by `npm start`. See `docs/installation/local-install.md`.
-
----
-
-## ThreadWriter Desktop (Tauri)
-
-The Tauri-based desktop version of the ThreadWriter is available at:
-
-[https://github.com/mkueper/ThreadWriter](https://github.com/mkueper/ThreadWriter)
 
 ---
 
@@ -206,11 +197,12 @@ Security note: Do not commit `.env`. Restrict permissions (e.g., `chmod 600 .env
 
 Primarily used by the dashboard and administrative automation. All require a valid session:
 
-* `GET /api/client-config` – Client runtime configuration
+* `GET /api/client-config` – Dashboard runtime configuration
 * `GET/PUT /api/settings/scheduler` – Scheduler settings
-* `GET/PUT /api/settings/client-polling` – Polling overrides
+* `GET/PUT /api/settings/client-polling` – Dashboard polling overrides
 * `POST /api/skeets/:id/publish-now` – Immediate publish
 * `POST /api/threads/:id/publish-now` – Immediate thread publish
+* `POST /api/skeets/:id/pause` / `POST /api/skeets/:id/resume` – Pause or resume a recurring post
 * `POST /api/threads/:id/engagement/refresh` – Refresh thread engagement
 * `GET /api/reactions/:skeetId` – Reaction details
 * `GET /api/events` – Server-Sent Events
@@ -223,7 +215,6 @@ Primarily used by the dashboard and administrative automation. All require a val
 
 * **Manual testing**: `npm run start:dev` + dashboard build
 * **Linting**: `npm run lint` / `npm run lint:fix`
-* **Client tests**: `npm run test --workspace bsky-client`
 * **Dashboard tests**: `npm run test --workspace dashboard`
 * **Backend tests**: Root-level Vitest suite using in-memory SQLite
 * **CI**: GitHub Actions run type checks, build frontend, lint, and test

@@ -2,7 +2,7 @@
 
 ## Überblick
 
-- Fokus auf Engpässe in Scheduler, Engagement-Collector sowie Bsky-Client/Dashboard, weil hier aktuell die meiste Komplexität und Laufzeit anfällt.
+- Fokus auf Engpässe in Scheduler, Engagement-Collector und Dashboard, weil hier aktuell die meiste Komplexität und Laufzeit anfällt.
 - Maßnahmen priorisiert nach Impact auf Stabilität (Scheduler/Engagement), Security (Auth/Storage) und Wartbarkeit (Formulare, State-Management, Electron-Bundle).
 - Alle Vorschläge zielen auf inkrementelle Verbesserungen – keine Big-Bang-Refactors.
 
@@ -53,24 +53,11 @@
 ## Dashboard-Frontend
 
 - **Monolithische Container-Komponenten**  
-  `dashboard/src/App.jsx:1` (1.168 Zeilen), `dashboard/src/components/SkeetForm.jsx:1` (1.555 Zeilen) und `dashboard/src/components/ThreadForm.jsx:1` (1.815 Zeilen) bündeln State-Management, API-Aufrufe und UI. Das verhindert Wiederverwendung (z. B. ThreadComposer für bsky-client) und macht Tests schwer. Vorschlag: Form-spezifische State-Machines + Hooks nach `packages/shared-logic` ziehen (z. B. `useSchedulerFormState`, `useThreadComposer`), UI in kleinere Presentational Components teilen und nur noch Intent-Events nach oben geben.
+  `dashboard/src/App.jsx:1` (1.168 Zeilen), `dashboard/src/components/SkeetForm.jsx:1` (1.555 Zeilen) und `dashboard/src/components/ThreadForm.jsx:1` (1.815 Zeilen) bündeln State-Management, API-Aufrufe und UI. Das macht Tests schwer. Vorschlag: Form-spezifische State-Machines + Hooks nach `packages/shared-logic` ziehen (z. B. `useSchedulerFormState`, `useThreadComposer`), UI in kleinere Presentational Components teilen und nur noch Intent-Events nach oben geben.
 - **SSE-Client ohne Reconnect-Strategie (`dashboard/src/hooks/useSse.js:9-47`)**  
   Bei Fehlern wird `setConnected(false)` gesetzt, aber es gibt kein Backoff, kein `src.close()/new EventSource`. Dadurch bleiben Dead-Connections hängen, bis die Seite neu geladen wird. Implementiere `EventSource`-Wrapper mit `readyState`-Watcher und `setTimeout`-basiertem Reconnect, inkl. Auth-Refresh (falls `401`).
 - **Fetch-Layer fehlt**  
   Über 30 Stellen rufen `fetch('/api/...')` direkt (siehe `rg "/api" dashboard/src`). Eine zentrale API-Schicht (z. B. `@/services/apiClient`) mit generischer Fehlerbehandlung, Retry und `AbortController` würde Doppelcode (Headers, JSON-Parsing) reduzieren und Testbarkeit erhöhen.
-
-## Bluesky-Client
-
-- **AuthContext speichert Tokens unverschlüsselt im LocalStorage (`bsky-client/src/modules/auth/AuthContext.jsx:206-353`)**  
-  Trotz `rememberSession` landen komplette Sessions (`accessJwt`, `refreshJwt`, `did`) als JSON in `localStorage`. Browser-Extensions oder abhanden gekommene Backups können die Tokens missbrauchen. Empfehlung: Sessions nur im Memory halten, optional verschlüsselt über OS-Keychain (Electron) oder WebCrypto + passwortgeschützter Store persistieren. Mindestens `localStorage`-Zugriffe try/catch-absichern, weil Safari Private Mode/SSO das Schreiben verbietet.
-- **AuthContext ist 600+ Zeilen komplexer State (`bsky-client/src/modules/auth/AuthContext.jsx:1-646`)**  
-  Er vereint Storage-Protokoll, Multi-Account-Reducer, Netzwerk-Funktionen und UI Events (`addAccount`). Aufsplitten in (1) reine Storage-/Account-Service (Plain JS), (2) `useAuthStore` Hook (Zustand/Redux) und (3) UI-spezifische Context-Provider. Dadurch werden Tests möglich (aktueller Code nutzt direkte `localStorage`-Aufrufe in Hooks).
-- **ListService ohne Request-Abbrüche (`bsky-client/src/modules/listView/listService.js:98-172`) & Timeline ohne Cancels (`bsky-client/src/modules/timeline/Timeline.jsx:31-75`)**  
-  Beim Tab-Wechsel bleiben alte `runListRefresh` Promises aktiv und überschreiben neue Ergebnisse (Race Condition). Addiere `AbortController` pro List-Key und frühzeitige Exit-Bedingungen auf Cursor-Level.
-- **VirtualizedList an DOM-ID gebunden (`bsky-client/src/modules/listView/VirtualizedList.jsx:43-121`)**  
-  Das Scroll-Tracking geht hard-coded auf `#bsky-scroll-container`. Reusability leidet (Chat, Modal-Listen), außerdem funktioniert Virtualisierung nicht, wenn mehrere Scroller existieren. Refactor zu `forwardRef` + `ResizeObserver`, optional `react-virtualized`/`@tanstack/virtual`.
-- **Timeline-Itemhöhe fest (`bsky-client/src/modules/timeline/Timeline.jsx:145-167`)**  
-  `itemHeight={220}` ignoriert tatsächliche Content-Höhen und sorgt bei Bildern/Threads für „Sprünge“. Lösung: dynamische Höhenmessung (IntersectionObserver) oder `estimator` an `VirtualizedList`.
 
 ## Desktop / Electron
 

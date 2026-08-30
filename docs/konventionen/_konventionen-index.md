@@ -1,13 +1,12 @@
-# BSky-Kampagnen-Tool – UI-Konventionen (Dashboard & BSky-Client)
+# BSky-Kampagnen-Tool – UI-Konventionen (Dashboard)
 
-Diese Datei definiert die verbindlichen Richtlinien für das Erstellen und Pflegen von UI-Komponenten in Dashboard und BSky-Client.
+Diese Datei definiert die verbindlichen Richtlinien für das Erstellen und Pflegen von UI-Komponenten im Dashboard.
 
 ---
 
 ## 1. Geltungsbereich
 
 * React-Komponenten in `dashboard/src/**`
-* React-Komponenten in `bsky-client/src/**`
 * Layout-Strukturen, Hooks und UI-Helper
 * Komponenten für Modals, Buttons, Lists, Cards
 
@@ -47,11 +46,6 @@ Diese Datei definiert die verbindlichen Richtlinien für das Erstellen und Pfleg
 * Tailwind-Klassen bevorzugen
 * Inline-Styles vermeiden
 * Keine !important-Regeln
-
-### 4.2 Bsky-Client
-
-* Tailwind + lokale CSS-Dateien
-* Wiederverwendbare Utility-Klassen nutzen
 
 ### 4.3 Einhaltung des Design-Systems
 

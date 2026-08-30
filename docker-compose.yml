@@ -28,8 +28,8 @@ services:
   frontend:
     restart: unless-stopped
     build:
-      # Setze den Build‑Kontext per ENV, damit auch externe Ordnerstrukturen funktionieren.
-      # Erwarte hier den Projekt‑Root, der sowohl "dashboard/" als auch "bsky-client/" enthält.
+      # Setze den Build-Kontext per ENV, damit auch externe Ordnerstrukturen funktionieren.
+      # Erwarte hier den Projekt-Root mit dem Ordner "dashboard/".
       # Beispiel Aufruf:
       #   FRONTEND_BUILD_CONTEXT=/pfad/zum/projekt docker compose build frontend
       context: ${FRONTEND_BUILD_CONTEXT:-.}

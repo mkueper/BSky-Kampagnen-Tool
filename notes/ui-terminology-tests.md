@@ -30,24 +30,6 @@ Im ersten Schritt fokussieren wir uns auf das **Dashboard** (`dashboard/src`):
   - `views/LoginView.jsx`
   - Layout (`components/layout/AppLayout.jsx`)
 
-Der `bsky-client` sowie andere Frontends (z. B. Mastodon-spezifische UIs) werden später separat betrachtet.
-
-### Bluesky-Client (`bsky-client`)
-
-Der integrierte Bluesky-Client ist **plattform-spezifisch**, soll aber terminologisch so nah wie möglich an der offiziellen Bluesky-UI (deutsch) bleiben. Für Tests gilt:
-
-- Der Client darf Bluesky-spezifische Konzepte direkt abbilden (Feed, Thread, Post etc.).
-- Für Actions/Buttons verwenden wir dieselben Begriffe wie im Dashboard:
-  - `Reply` → „Antworten“
-  - `Repost` → „Reposten“
-  - `Quote Post` → „Post zitieren“
-- Sichtbare Begriffe wie „Skeet/Skeets“ sollen auch im Client nicht mehr verwendet werden; stattdessen „Post/Posts“.
-- Tests für den Client prüfen insbesondere:
-  - Kontextmenüs (Post-Aktionen),
-  - Buttons unter Posts,
-  - Tooltips/`aria-label`s,
-  - leere Zustände/Statusmeldungen, die Posts/Threads erwähnen.
-
 ## Terminologie-Regeln (aus `docs/ui.md`)
 
 ### Posts
@@ -67,8 +49,7 @@ Der integrierte Bluesky-Client ist **plattform-spezifisch**, soll aber terminolo
   - About-Überschrift
   - ggf. Fenster-/Titelzeile (Electron)
 - Im Fließtext: **„Kampagnen‑Tool“**.
-- Plattform-spezifische Bereiche behalten ihre Namen:
-  - z. B. „Bluesky Client“.
+- Plattformnamen erscheinen nur bei Zielplattformen, Zugangsdaten und Plattform-Badges.
 
 ### Posts-Navigation
 
@@ -127,7 +108,7 @@ Der integrierte Bluesky-Client ist **plattform-spezifisch**, soll aber terminolo
   - Titel: `"Post-Aktivität"`
   - Beschreibung enthält: `"geplante und veröffentlichte Posts"`
 - Tabs:
-  - `"Geplant"`, `"Veröffentlicht"`, `"Wartend"`, `"Papierkorb"`
+  - `"Geplant"`, `"Pausiert"`, `"Veröffentlicht"`, `"Freizugeben"`, `"Papierkorb"`
 
 ### Listen (Planned/Published/Deleted)
 
@@ -323,4 +304,4 @@ Technisch können wir das z. B. so prüfen:
   - Entweder direkte Imports der entsprechenden Module (`App.jsx`, `MainOverviewView.jsx`, etc.)
   - oder bei String-Suchen ein einfacher Datei-Scan (z. B. via Node-FS und RegEx) innerhalb des Tests.
 
-Diese Datei dient vorerst nur als Referenz, bis wir die offenen UI-Fragen (v. a. rund um den `bsky-client`) geklärt haben und die Tests tatsächlich implementieren. 
+Diese Datei dient vorerst nur als Referenz, bis die offenen UI-Fragen geklärt sind und die Tests tatsächlich implementiert werden.

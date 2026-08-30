@@ -14,7 +14,7 @@
 ## Grundlegende Konfiguration & Monitoring
 
 - **GET `/api/client-config`**  
-  Liefert die vereinigte Client-Konfiguration für das Dashboard. Enthält Polling-Intervalle, Heartbeat, Jitter, Locale, Zeitzone sowie Flags wie `needsCredentials`. Antwort ist heute ein „flaches“ Objekt `{ polling, images, search }` (noch ohne `{ data, meta, error }`).
+  Liefert die vereinigte Dashboard-Konfiguration. Enthält Polling-Intervalle, Heartbeat, Jitter, Locale, Zeitzone sowie Flags wie `needsCredentials`. Antwort ist heute ein „flaches“ Objekt `{ polling, images, search }` (noch ohne `{ data, meta, error }`).
 
 - **GET/PUT `/api/settings/scheduler`**  
   Lesen bzw. Schreiben des Scheduler-Setups. Request-Payload (PUT):  
@@ -83,8 +83,8 @@ Aktuell gelten u. a. folgende Codes:
   - `SETTINGS_GENERAL_LOCALE_REQUIRED` – `LOCALE` fehlt; `400`.
   - `SETTINGS_GENERAL_LOCALE_UNSUPPORTED` – `LOCALE` ist nicht `de` oder `en`; `400`.
   - `SETTINGS_GENERAL_SAVE_FAILED` – generischer Fehler beim Speichern; `500`.
-- **Settings – Client-Polling (`/api/settings/client-polling`)**
-  - `SETTINGS_POLLING_LOAD_FAILED` – Fehler beim Laden der Client-Polling-Konfiguration; `500`.
+- **Settings – Dashboard-Polling (`/api/settings/client-polling`)**
+  - `SETTINGS_POLLING_LOAD_FAILED` – Fehler beim Laden der Dashboard-Polling-Konfiguration; `500`.
   - `SETTINGS_POLLING_INVALID_NUMBERS` – Polling-Intervalle/Backoff-Werte sind keine positiven Zahlen; `400`.
   - `SETTINGS_POLLING_INVALID_JITTER` – `POLL_JITTER_RATIO` liegt nicht im Intervall `[0, 1]`; `400`.
   - `SETTINGS_POLLING_SAVE_FAILED` – generischer Fehler beim Speichern; `500`.
@@ -190,6 +190,12 @@ Aktuell gelten u. a. folgende Codes:
 - **POST `/api/skeets/:id/restore`**  
   Stellt einen gelöschten Skeet wieder her (Soft-Delete).
 
+- **POST `/api/skeets/:id/pause`
+  Pausiert einen geplanten, wiederkehrenden Skeet. Wiederholungsmuster und Terminreferenzen bleiben erhalten.
+
+- **POST `/api/skeets/:id/resume`
+  Setzt einen pausierten, wiederkehrenden Skeet fort und plant den nächsten regulären zukünftigen Termin.
+
 - **POST `/api/skeets/:id/publish-now`**  
   Überspringt den Scheduler und veröffentlicht sofort (sofern Credentials vorhanden). Antwort enthält den aktualisierten Datensatz.
 
@@ -287,13 +293,15 @@ Aktuell gelten u. a. folgende Codes:
 
 ---
 
-## Bluesky-Direktaktionen (Dashboard → Bluesky-API)
+## Bluesky-Plattformendpunkte
+
+> Diese Backend-Endpunkte sind weiterhin verfügbar, werden jedoch nicht mehr von einem eingebetteten Bluesky-Client im Dashboard verwendet. Sie sind als Kompatibilitäts- und Plattform-API dokumentiert.
 
 - **GET `/api/bsky/timeline?tab=discover|following|mutuals|friends-popular|best-of-follows`**  
-  Liefert den entsprechenden Feed für den integrierten Client. Je nach Parametern (z. B. `tab`, `feedUri`) werden unterschiedliche Quellen bedient. Antwort ist heute ein „flaches“ Objekt mit Items/Meta-Informationen.
+  Liefert den entsprechenden Feed. Je nach Parametern (z. B. `tab`, `feedUri`) werden unterschiedliche Quellen bedient. Antwort ist heute ein „flaches“ Objekt mit Items/Meta-Informationen.
 
 - **POST `/api/bsky/post`**  
-  Direktes Posten eines Skeets über den eingebauten Composer. Payload umfasst `text`, optionale `reply`-Informationen, Medien-Strukturen analog zu den Planern sowie optional `external` (Link-Preview mit `uri`, `title`, `description`, `image`).
+  Sendet einen Post direkt an Bluesky. Payload umfasst `text`, optionale `reply`-Informationen, Medien-Strukturen analog zu den Planern sowie optional `external` (Link-Preview mit `uri`, `title`, `description`, `image`).
 
 - **POST `/api/bsky/reply`**  
   Antwortet auf einen existierenden Post (`{ uri, cid, text }`). Unterstützt ebenfalls optionale Medien sowie `external`.
@@ -309,7 +317,7 @@ Aktuell gelten u. a. folgende Codes:
 ## Hilfsendpunkte & Werkzeuge
 
 - **GET `/api/preview?url=...`**  
-  Liefert og:image, Titel und Beschreibung für Link-Previews im Composer.
+  Liefert og:image, Titel und Beschreibung für Link-Previews.
 - **GET `/preview?url=...`**  
   Alias zu `/api/preview` (auth-geschuetzt), z. B. fuer `/preview`-Defaults in Clients.
 
